@@ -4,19 +4,14 @@ import { useEffect, useRef } from "react";
 import * as THREE from "three";
 
 /**
- * Particle-sphere hero: thousands of glowing points distributed evenly over a
- * sphere (Fibonacci lattice), shaded red with a luminous rim and a dark
- * core, on near-black — additive blending makes the silhouette glow where
- * points overlap along the view direction.
+ * Icosahedron hero: thousands of glowing red particles scattered across the 20
+ * triangular faces of an icosahedron, shaded by their flat face normals so the
+ * facets read. It tumbles slowly and follows the cursor — a solid rotation, not
+ * a 4D fold. Additive blending makes the silhouette glow.
  *
- * Mouse interaction:
- *  - the sphere gently rotates to follow the cursor (parallax tilt), and
- *  - points near the cursor bulge outward and brighten (an interactive ripple).
- *
- * prefers-reduced-motion → one static frame, no loop. Pauses when hidden /
- * offscreen. No WebGL → CSS gradient fallback shows through.
+ * prefers-reduced-motion → one static frame. Pauses when hidden / offscreen.
  */
-export default function HeroCanvas() {
+export default function IcosahedronCanvas() {
   const mountRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -57,29 +52,79 @@ export default function HeroCanvas() {
     const isSmall = window.innerWidth < 768;
     const COUNT = isSmall ? 7000 : 14000;
 
-    // --- Fibonacci-sphere point cloud ---------------------------------------
-    const positions = new Float32Array(COUNT * 3);
-    const rand = new Float32Array(COUNT);
-    const golden = Math.PI * (3 - Math.sqrt(5)); // golden angle
-    for (let i = 0; i < COUNT; i++) {
-      const y = 1 - (i / (COUNT - 1)) * 2;
-      const r = Math.sqrt(Math.max(0, 1 - y * y));
-      const theta = golden * i;
-      positions[i * 3] = Math.cos(theta) * r;
-      positions[i * 3 + 1] = y;
-      positions[i * 3 + 2] = Math.sin(theta) * r;
-      // deterministic per-point variation (no Math.random — keeps SSR/resume calm)
-      rand[i] = (Math.sin(i * 12.9898) * 43758.5453) % 1;
-      if (rand[i] < 0) rand[i] += 1;
+    // --- Icosahedron surface point cloud ------------------------------------
+    const source = new THREE.IcosahedronGeometry(1.12, 0);
+    const srcPos = source.getAttribute("position").array as Float32Array;
+    const srcNrm = source.getAttribute("normal").array as Float32Array;
+    const triCount = srcPos.length / 9; // non-indexed: 9 floats per triangle
+
+    // deterministic PRNG (no Math.random — keeps SSR/resume calm)
+    let seed = 0x9e3779b9;
+    const rng = () => {
+      seed = (seed + 0x6d2b79f5) | 0;
+      let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+
+    const areas = new Float32Array(triCount);
+    let totalArea = 0;
+    const va = new THREE.Vector3(),
+      vb = new THREE.Vector3(),
+      vc = new THREE.Vector3();
+    for (let t = 0; t < triCount; t++) {
+      const o = t * 9;
+      va.set(srcPos[o], srcPos[o + 1], srcPos[o + 2]);
+      vb.set(srcPos[o + 3], srcPos[o + 4], srcPos[o + 5]);
+      vc.set(srcPos[o + 6], srcPos[o + 7], srcPos[o + 8]);
+      const area = vb.clone().sub(va).cross(vc.clone().sub(va)).length() * 0.5;
+      areas[t] = area;
+      totalArea += area;
     }
+
+    const positions = new Float32Array(COUNT * 3);
+    const normals = new Float32Array(COUNT * 3);
+    const rand = new Float32Array(COUNT);
+    let p = 0;
+    for (let t = 0; t < triCount && p < COUNT; t++) {
+      const o = t * 9;
+      const share =
+        t === triCount - 1
+          ? COUNT - p
+          : Math.round((areas[t] / totalArea) * COUNT);
+      const nx = srcNrm[o],
+        ny = srcNrm[o + 1],
+        nz = srcNrm[o + 2];
+      for (let k = 0; k < share && p < COUNT; k++, p++) {
+        let u = rng(),
+          v = rng();
+        if (u + v > 1) {
+          u = 1 - u;
+          v = 1 - v;
+        }
+        const w = 1 - u - v;
+        positions[p * 3] = srcPos[o] * w + srcPos[o + 3] * u + srcPos[o + 6] * v;
+        positions[p * 3 + 1] =
+          srcPos[o + 1] * w + srcPos[o + 4] * u + srcPos[o + 7] * v;
+        positions[p * 3 + 2] =
+          srcPos[o + 2] * w + srcPos[o + 5] * u + srcPos[o + 8] * v;
+        normals[p * 3] = nx;
+        normals[p * 3 + 1] = ny;
+        normals[p * 3 + 2] = nz;
+        rand[p] = rng();
+      }
+    }
+    source.dispose();
+
     const geo = new THREE.BufferGeometry();
     geo.setAttribute("position", new THREE.BufferAttribute(positions, 3));
+    geo.setAttribute("a_normal", new THREE.BufferAttribute(normals, 3));
     geo.setAttribute("a_rand", new THREE.BufferAttribute(rand, 1));
 
     const uniforms = {
       u_time: { value: 0 },
       u_dpr: { value: DPR },
-      u_mouseView: { value: new THREE.Vector2(0, 0) }, // cursor in view-plane units
+      u_mouseView: { value: new THREE.Vector2(0, 0) },
     };
 
     const NOISE_GLSL = /* glsl */ `
@@ -98,13 +143,13 @@ export default function HeroCanvas() {
         vec3 x2 = x0 - i2 + 2.0 * C.xxx;
         vec3 x3 = x0 - 1.0 + 3.0 * C.xxx;
         i = mod(i, 289.0);
-        vec4 p = permute(permute(permute(
+        vec4 pp = permute(permute(permute(
                    i.z + vec4(0.0, i1.z, i2.z, 1.0))
                  + i.y + vec4(0.0, i1.y, i2.y, 1.0))
                  + i.x + vec4(0.0, i1.x, i2.x, 1.0));
         float n_ = 1.0/7.0;
         vec3 ns = n_ * D.wyz - D.xzx;
-        vec4 j = p - 49.0 * floor(p * ns.z *ns.z);
+        vec4 j = pp - 49.0 * floor(pp * ns.z *ns.z);
         vec4 x_ = floor(j * ns.z);
         vec4 y_ = floor(j - 7.0 * x_);
         vec4 x = x_ *ns.x + ns.yyyy;
@@ -140,22 +185,20 @@ export default function HeroCanvas() {
         uniform float u_dpr;
         uniform vec2 u_mouseView;
         attribute float a_rand;
+        attribute vec3 a_normal;
         varying float vBright;
         ${NOISE_GLSL}
         void main(){
-          vec3 dir = normalize(position);
-          // Surface shimmer.
+          vec3 nrm = normalize(a_normal);
           float n = snoise(position * 1.6 + vec3(0.0, 0.0, u_time * 0.14));
-          float radius = 1.0 + n * 0.035;
-          vec3 pos = dir * radius;
+          vec3 pos = position + nrm * n * 0.045;
 
           vec4 mv = modelViewMatrix * vec4(pos, 1.0);
-          vec3 vn = normalize(normalMatrix * dir);
+          vec3 vn = normalize(normalMatrix * nrm);
           vec3 V = normalize(-mv.xyz);
-          float fres = 1.0 - abs(dot(vn, V));   // 0 core .. 1 rim
+          float fres = 1.0 - abs(dot(vn, V));
           vBright = pow(fres, 1.6);
 
-          // Cursor bulge: points near the projected cursor push outward + glow.
           vec2 ndc = mv.xy / -mv.z;
           float d = distance(ndc, u_mouseView);
           float push = smoothstep(0.5, 0.0, d) * 0.32;
@@ -184,11 +227,10 @@ export default function HeroCanvas() {
       `,
     });
 
-    const orb = new THREE.Points(geo, material);
-    orb.position.y = 0.32; // lift above the bottom-left intro
-    scene.add(orb);
+    const solid = new THREE.Points(geo, material);
+    solid.position.y = 0.32;
+    scene.add(solid);
 
-    // Faint outer haze so the glow doesn't end hard at the rim.
     const hazeMat = new THREE.ShaderMaterial({
       uniforms,
       transparent: true,
@@ -218,30 +260,26 @@ export default function HeroCanvas() {
     haze.position.set(0, 0.32, -1.0);
     scene.add(haze);
 
-    // Fit the orb to the viewport shape: on tall/narrow (portrait phone, iPad
-    // portrait) viewports, push the camera back (smaller orb) and raise it so
-    // the bottom-left intro always has clear space beneath it.
     const applyLayout = () => {
       const a = camera.aspect;
       let z: number, y: number;
       if (a < 0.85) {
-        z = 6.9; // portrait phone
+        z = 6.9;
         y = 1.05;
       } else if (a < 1.25) {
-        z = 6.0; // square-ish / iPad portrait
+        z = 6.0;
         y = 0.62;
       } else {
-        z = 5.0; // landscape / desktop
+        z = 5.0;
         y = 0.32;
       }
       camera.position.z = z;
       camera.updateProjectionMatrix();
-      orb.position.y = y;
+      solid.position.y = y;
       haze.position.y = y;
     };
     applyLayout();
 
-    // --- Input + responsiveness ---------------------------------------------
     const targetMouse = new THREE.Vector2(0, 0);
     const smoothMouse = new THREE.Vector2(0, 0);
     const halfTan = Math.tan((FOV * Math.PI) / 180 / 2);
@@ -253,8 +291,6 @@ export default function HeroCanvas() {
         -(((e.clientY - r.top) / r.height) * 2 - 1)
       );
     };
-    // Touch has no resting hover: when the finger lifts (or the mouse leaves),
-    // ease the cursor influence back to center so the bulge relaxes.
     const recenter = () => targetMouse.set(0, 0);
     const onPointerUp = (e: PointerEvent) => {
       if (e.pointerType === "touch") recenter();
@@ -273,7 +309,6 @@ export default function HeroCanvas() {
     mount.addEventListener("pointerleave", recenter, { passive: true });
     window.addEventListener("resize", onResize);
 
-    // --- Render loop with pausing -------------------------------------------
     const clock = new THREE.Clock();
     let raf = 0;
     let running = true;
@@ -287,8 +322,8 @@ export default function HeroCanvas() {
         smoothMouse.y * halfTan
       );
 
-      orb.rotation.y = tEl * 0.05 + smoothMouse.x * 0.5;
-      orb.rotation.x = -smoothMouse.y * 0.35;
+      solid.rotation.y = tEl * 0.12 + smoothMouse.x * 0.5;
+      solid.rotation.x = tEl * 0.05 - smoothMouse.y * 0.35;
 
       renderer.render(scene, camera);
     };

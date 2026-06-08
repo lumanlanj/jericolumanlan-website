@@ -1,9 +1,9 @@
-import HeroCanvas from "@/components/HeroCanvas";
+import IcosahedronCanvas from "@/components/IcosahedronCanvas";
 
 /**
- * Full-viewport landing hero: the 3D orb floats as the centerpiece with a bold,
- * yurikim-style introductory statement anchored bottom-left. A CSS radial
- * gradient is the WebGL fallback (shown if the canvas renders nothing).
+ * Full-viewport landing hero: the 3D icosahedron floats as the centerpiece with
+ * a bold, yurikim-style introductory statement anchored bottom-left. A CSS
+ * radial gradient is the WebGL fallback (shown if the canvas renders nothing).
  */
 export default function Hero() {
   return (
@@ -14,7 +14,7 @@ export default function Hero() {
           "radial-gradient(80% 70% at 50% 42%, #0c0814 0%, #050507 55%, #020203 100%)",
       }}
     >
-      <HeroCanvas />
+      <IcosahedronCanvas />
 
       {/* Legibility scrim behind the intro. */}
       <div
