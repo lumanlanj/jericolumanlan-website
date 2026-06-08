@@ -16,10 +16,37 @@ const fragmentMono = Fragment_Mono({
   display: "swap",
 });
 
+const TITLE = "Jerico Lumanlan — Product Manager";
+const DESCRIPTION =
+  "Jerico Lumanlan is a Product Manager building products across sustainability, ecommerce, and customer experience.";
+const SITE_URL = "https://jericolumanlan.com";
+
 export const metadata: Metadata = {
-  title: "Jerico Lumanlan — Product Manager",
-  description:
-    "Jerico Lumanlan is a Product Manager building products across sustainability, ecommerce, and customer experience.",
+  metadataBase: new URL(SITE_URL),
+  title: TITLE,
+  description: DESCRIPTION,
+  openGraph: {
+    type: "website",
+    url: SITE_URL,
+    siteName: "Jerico Lumanlan",
+    title: TITLE,
+    description: DESCRIPTION,
+    images: [
+      {
+        url: "/og.png",
+        width: 1200,
+        height: 630,
+        alt: "Jerico Lumanlan — Product Manager",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: TITLE,
+    description: DESCRIPTION,
+    creator: "@jericolumanlan",
+    images: ["/og.png"],
+  },
 };
 
 export default function RootLayout({
