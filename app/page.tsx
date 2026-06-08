@@ -58,7 +58,7 @@ export default async function Home() {
             const external = href?.startsWith("http");
             const year = p.date?.slice(0, 4);
             const Inner = (
-              <div className="group py-7 flex flex-col gap-2">
+              <div className="group flex flex-col gap-2">
                 <span className="font-mono text-[11px] uppercase tracking-[0.16em] text-(--color-muted)">
                   {STATUS_LABEL[p.status]}
                   {year ? ` · ${year}` : ""}
@@ -82,12 +82,12 @@ export default async function Home() {
                 href={href}
                 target={external ? "_blank" : undefined}
                 rel={external ? "noopener" : undefined}
-                className="block no-underline"
+                className="block no-underline py-7 first:pt-0"
               >
                 {Inner}
               </a>
             ) : (
-              <div key={p.slug}>{Inner}</div>
+              <div key={p.slug} className="py-7 first:pt-0">{Inner}</div>
             );
           })}
         </div>
@@ -151,7 +151,7 @@ function Section({
       className="scroll-mt-20 border-t border-(--color-border) py-20 md:py-28"
     >
       <div className="mx-auto max-w-[1100px] px-6">
-        <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-(--color-muted) mb-10">
+        <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-(--color-muted) mb-6">
           {eyebrow}
         </p>
         {children}
