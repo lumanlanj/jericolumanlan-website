@@ -52,7 +52,7 @@ export default async function Home() {
 
       {/* WORK */}
       <Section id="work" eyebrow="Selected work">
-        <div className="divide-y divide-(--color-border) border-t border-(--color-border)">
+        <div className="divide-y divide-(--color-border)">
           {projects.map((p) => {
             const href = p.links?.[0]?.url;
             const external = href?.startsWith("http");
