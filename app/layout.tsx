@@ -34,8 +34,8 @@ export const metadata: Metadata = {
     images: [
       {
         url: "/og.png",
-        width: 1200,
-        height: 630,
+        width: 2400,
+        height: 1260,
         alt: "Jerico Lumanlan — Product Manager",
       },
     ],
