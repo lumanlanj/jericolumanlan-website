@@ -168,12 +168,6 @@ function Footer() {
           <p className="text-[22px] md:text-[28px] font-semibold tracking-tight text-(--color-ink) max-w-[20ch]">
             Let&rsquo;s build something that holds up.
           </p>
-          <a
-            href="mailto:lumanlanj@gmail.com"
-            className="inline-block mt-4 text-[16px] text-(--color-accent) no-underline hover:opacity-80 transition"
-          >
-            lumanlanj@gmail.com
-          </a>
         </div>
         <div className="font-mono text-[12px] uppercase tracking-[0.14em] text-(--color-muted) flex gap-5">
           <a href="https://www.linkedin.com/in/jerico-lumanlan" target="_blank" rel="noopener" className="hover:text-(--color-ink) transition no-underline">LinkedIn</a>
