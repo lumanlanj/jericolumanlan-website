@@ -1,14 +1,13 @@
 ---
 title: This site
-description: Self-updating personal site that aggregates Medium posts, GitHub activity, and a repo-local log into one chronological timeline. Zero LLM authorship in v1.
+description: My personal site — a dark, single-page portfolio fronted by an interactive WebGL particle orb, pulling my writing live from Substack and Medium. Next.js, no database, current at the source.
 status: live
 order: 2
-date: 2026-05-26
-links:
-  - label: Source
-    url: https://github.com/lumanlanj/jericolumanlan-website
+date: 2026-06-08
 ---
 
-The site I'm reading on right now. Next.js 14, Vercel, no database. Sources are fetched live on every request: Medium RSS, GitHub GraphQL, repo-local markdown. A source failing silently drops out of the timeline rather than breaking the page.
+The site you're on. Next.js 16 on Vercel, no database — my writing feed is fetched live from Substack and Medium RSS on every request, merged newest-first with cross-posts de-duplicated, so it stays current at the source.
 
-The premise: I'm already publishing to existing channels. Why maintain a parallel portfolio that copies what's elsewhere? Aggregate them in one place and let them stay current at the source.
+The hero is a particle orb rendered in Three.js / WebGL that responds to your cursor — or your finger on touch — with graceful fallbacks for reduced-motion and devices without WebGL. This version leans heavily on AI assistance to build, a deliberate departure from the earlier hand-coded site.
+
+The premise hasn't changed: I already publish to existing channels, so rather than maintain a parallel portfolio, I aggregate them here and let them stay current where they live.
