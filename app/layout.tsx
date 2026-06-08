@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Inter, Fragment_Mono } from "next/font/google";
 import "./globals.css";
 import TopNav from "@/components/TopNav";
@@ -47,6 +47,15 @@ export const metadata: Metadata = {
     creator: "@jericolumanlan",
     images: ["/og.png"],
   },
+};
+
+// Dark browser chrome to match the site; edge-to-edge so the safe-area insets
+// below can let the floating nav clear the notch / Dynamic Island.
+export const viewport: Viewport = {
+  themeColor: "#08080c",
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
 };
 
 export default function RootLayout({

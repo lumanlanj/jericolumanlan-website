@@ -41,7 +41,7 @@ const EXTERNAL = [
 
 export default function TopNav() {
   return (
-    <header className="fixed top-4 inset-x-0 z-50 flex justify-center px-4">
+    <header className="fixed top-[max(1rem,env(safe-area-inset-top))] inset-x-0 z-50 flex justify-center px-[max(1rem,env(safe-area-inset-left),env(safe-area-inset-right))]">
       <nav
         className="flex items-center gap-1 rounded-full
                    bg-white/[0.07] backdrop-blur-xl
@@ -53,7 +53,7 @@ export default function TopNav() {
           <Link
             key={l.href}
             href={l.href}
-            className="px-3.5 sm:px-4 py-1.5 rounded-full text-[13px] sm:text-[14px]
+            className="px-3.5 sm:px-4 py-2 sm:py-1.5 rounded-full text-[13px] sm:text-[14px]
                        text-(--color-muted) hover:text-(--color-ink) hover:bg-white/[0.08]
                        transition no-underline"
           >
