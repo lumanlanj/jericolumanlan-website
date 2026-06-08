@@ -39,11 +39,11 @@ export default function Hero() {
             experience.
           </p>
           <div className="mt-6 flex flex-wrap gap-x-5 gap-y-2 font-mono text-[12px] uppercase tracking-[0.12em] text-white/45">
+            <span>Now @ Xpansiv</span>
+            <span className="text-white/25">/</span>
+            <span>Previously Spotify, Staples</span>
+            <span className="text-white/25">/</span>
             <span>Based in Boston</span>
-            <span className="text-white/25">/</span>
-            <span>Climate tech</span>
-            <span className="text-white/25">/</span>
-            <span>Building agents I use</span>
           </div>
         </div>
       </div>

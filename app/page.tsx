@@ -30,8 +30,11 @@ export default async function Home() {
       <Section id="about" eyebrow="About">
         <div className="max-w-[60ch] space-y-5 text-[17px] md:text-[19px] leading-relaxed text-(--color-bio)">
           <p>
-            I&rsquo;m a product manager in climate tech. I care about products
-            that hold up under real constraints &mdash; where customer needs,
+            I&rsquo;m a product manager in climate tech, currently at{" "}
+            <span className="text-(--color-ink)">Xpansiv</span> &mdash; before
+            that, <span className="text-(--color-ink)">Spotify</span> and{" "}
+            <span className="text-(--color-ink)">Staples</span>. I care about
+            products that hold up under real constraints, where customer needs,
             business goals, and technical reality each get a seat at the table.
           </p>
           <p>
