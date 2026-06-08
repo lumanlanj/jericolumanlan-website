@@ -1,4 +1,5 @@
 import { readProjects } from "@/lib/projects";
+import Container from "@/components/Container";
 
 export const revalidate = 0;
 
@@ -6,6 +7,7 @@ export default async function ProjectsPage() {
   const projects = await readProjects();
 
   return (
+    <Container>
     <section>
       <header className="mb-6">
         <h1 className="text-[26px] font-bold uppercase tracking-[2.5px] mb-1 text-(--color-ink)">
@@ -40,7 +42,7 @@ export default async function ProjectsPage() {
                 </span>
               )}
             </h2>
-            <p className="text-[15px] text-[#555] leading-relaxed">{p.description}</p>
+            <p className="text-[15px] text-(--color-bio) leading-relaxed">{p.description}</p>
           </article>
         ))}
         {projects.length === 0 && (
@@ -48,5 +50,6 @@ export default async function ProjectsPage() {
         )}
       </div>
     </section>
+    </Container>
   );
 }

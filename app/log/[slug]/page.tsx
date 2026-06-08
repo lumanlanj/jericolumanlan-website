@@ -4,6 +4,7 @@ import { remark } from "remark";
 import remarkHtml from "remark-html";
 import { format, parseISO } from "date-fns";
 import Link from "next/link";
+import Container from "@/components/Container";
 
 export const revalidate = 0;
 
@@ -26,6 +27,7 @@ export default async function LogEntryPage({
   const html = processed.toString();
 
   return (
+    <Container>
     <article>
       <Link
         href="/log"
@@ -54,9 +56,10 @@ export default async function LogEntryPage({
         )}
       </header>
       <div
-        className="prose-content text-[16px] text-[#2a2a2a] leading-relaxed"
+        className="prose-content text-[16px] text-(--color-bio) leading-relaxed"
         dangerouslySetInnerHTML={{ __html: html }}
       />
     </article>
+    </Container>
   );
 }

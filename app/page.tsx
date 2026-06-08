@@ -1,33 +1,183 @@
+import Link from "next/link";
 import { fetchMedium } from "@/lib/medium";
-import { fetchGitHub } from "@/lib/github";
-import { logTimelineItems } from "@/lib/log";
-import { mergeTimeline } from "@/lib/merge";
-import HeaderCard from "@/components/HeaderCard";
-import TimelineRow from "@/components/TimelineRow";
+import { fetchSubstack } from "@/lib/substack";
+import { mergeWriting } from "@/lib/writing";
+import { readProjects } from "@/lib/projects";
+import Hero from "@/components/Hero";
+import type { Project } from "@/lib/types";
 
 export const revalidate = 0;
 
+const STATUS_LABEL: Record<Project["status"], string> = {
+  live: "Shipped",
+  wip: "In progress",
+  archived: "Archive",
+};
+
 export default async function Home() {
-  const [medium, github, log] = await Promise.all([
+  const [projects, medium, substack] = await Promise.all([
+    readProjects(),
     fetchMedium(),
-    fetchGitHub(),
-    logTimelineItems(),
+    fetchSubstack(),
   ]);
-  const { items } = mergeTimeline([medium, github, log]);
+  const recentWriting = mergeWriting(medium, substack).slice(0, 5);
 
   return (
     <>
-      <HeaderCard />
-      <section>
-        <h2 className="text-[12.5px] font-mono uppercase tracking-[0.3px] text-(--color-muted) mb-3">
-          Recent activity
-        </h2>
-        <ul className="list-none p-0">
-          {items.map((item) => (
-            <TimelineRow key={item.id} item={item} />
-          ))}
-        </ul>
-      </section>
+      <Hero />
+
+      {/* ABOUT */}
+      <Section id="about" eyebrow="About">
+        <div className="max-w-[60ch] space-y-5 text-[17px] md:text-[19px] leading-relaxed text-(--color-bio)">
+          <p>
+            I&rsquo;m a product manager in climate tech. I care about products
+            that hold up under real constraints &mdash; where customer needs,
+            business goals, and technical reality each get a seat at the table.
+          </p>
+          <p>
+            My working principle is simple: every meaningful decision needs
+            multiple stakeholders, each bringing their own expertise. The
+            product manager&rsquo;s job is to make sure none of those voices gets
+            lost on the way to a decision.
+          </p>
+          <p>
+            Outside of shipping, I build agents I actually use day to day, and I
+            treat this site as a working log of that craft.
+          </p>
+        </div>
+      </Section>
+
+      {/* WORK */}
+      <Section id="work" eyebrow="Selected work">
+        <div className="divide-y divide-(--color-border) border-t border-(--color-border)">
+          {projects.map((p) => {
+            const href = p.links?.[0]?.url;
+            const external = href?.startsWith("http");
+            const year = p.date?.slice(0, 4);
+            const Inner = (
+              <div className="group py-7 flex flex-col gap-2">
+                <span className="font-mono text-[11px] uppercase tracking-[0.16em] text-(--color-muted)">
+                  {STATUS_LABEL[p.status]}
+                  {year ? ` · ${year}` : ""}
+                </span>
+                <h3 className="text-[22px] md:text-[26px] font-semibold tracking-tight text-(--color-ink) flex items-center gap-2">
+                  {p.title}
+                  {href && (
+                    <span className="text-(--color-muted) group-hover:text-(--color-accent) transition text-[16px]">
+                      ↗
+                    </span>
+                  )}
+                </h3>
+                <p className="text-[15px] md:text-[16px] leading-relaxed text-(--color-bio) max-w-[62ch]">
+                  {p.description}
+                </p>
+              </div>
+            );
+            return href ? (
+              <a
+                key={p.slug}
+                href={href}
+                target={external ? "_blank" : undefined}
+                rel={external ? "noopener" : undefined}
+                className="block no-underline"
+              >
+                {Inner}
+              </a>
+            ) : (
+              <div key={p.slug}>{Inner}</div>
+            );
+          })}
+        </div>
+      </Section>
+
+      {/* WRITING */}
+      <Section id="writing" eyebrow="Writing">
+        {recentWriting.length === 0 ? (
+          <p className="text-(--color-muted)">No posts available right now.</p>
+        ) : (
+          <ul className="divide-y divide-(--color-border) border-t border-(--color-border)">
+            {recentWriting.map((item) => (
+              <li key={item.id}>
+                <a
+                  href={item.url}
+                  target="_blank"
+                  rel="noopener"
+                  className="group py-5 flex items-baseline justify-between gap-6 no-underline"
+                >
+                  <span className="text-[16px] md:text-[18px] text-(--color-ink) group-hover:text-(--color-accent) transition leading-snug">
+                    {item.title}
+                  </span>
+                  <time
+                    dateTime={item.timestamp}
+                    className="font-mono text-[12px] text-(--color-muted) tabular-nums whitespace-nowrap"
+                  >
+                    {item.timestamp.slice(0, 10)}
+                  </time>
+                </a>
+              </li>
+            ))}
+          </ul>
+        )}
+        <div className="mt-7">
+          <Link
+            href="/writing"
+            className="font-mono text-[12px] uppercase tracking-[0.14em] text-(--color-muted) hover:text-(--color-ink) transition no-underline"
+          >
+            All writing →
+          </Link>
+        </div>
+      </Section>
+
+      <Footer />
     </>
+  );
+}
+
+function Section({
+  id,
+  eyebrow,
+  children,
+}: {
+  id: string;
+  eyebrow: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <section
+      id={id}
+      className="scroll-mt-20 border-t border-(--color-border) py-20 md:py-28"
+    >
+      <div className="mx-auto max-w-[1100px] px-6">
+        <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-(--color-muted) mb-10">
+          {eyebrow}
+        </p>
+        {children}
+      </div>
+    </section>
+  );
+}
+
+function Footer() {
+  return (
+    <footer className="border-t border-(--color-border) py-16">
+      <div className="mx-auto max-w-[1100px] px-6 flex flex-col md:flex-row md:items-end md:justify-between gap-8">
+        <div>
+          <p className="text-[22px] md:text-[28px] font-semibold tracking-tight text-(--color-ink) max-w-[20ch]">
+            Let&rsquo;s build something that holds up.
+          </p>
+          <a
+            href="mailto:lumanlanj@gmail.com"
+            className="inline-block mt-4 text-[16px] text-(--color-accent) no-underline hover:opacity-80 transition"
+          >
+            lumanlanj@gmail.com
+          </a>
+        </div>
+        <div className="font-mono text-[12px] uppercase tracking-[0.14em] text-(--color-muted) flex gap-5">
+          <a href="https://www.linkedin.com/in/jerico-lumanlan" target="_blank" rel="noopener" className="hover:text-(--color-ink) transition no-underline">LinkedIn</a>
+          <a href="https://x.com/jericolumanlan" target="_blank" rel="noopener" className="hover:text-(--color-ink) transition no-underline">X</a>
+          <a href="https://jericolumanlan.medium.com" target="_blank" rel="noopener" className="hover:text-(--color-ink) transition no-underline">Medium</a>
+        </div>
+      </div>
+    </footer>
   );
 }

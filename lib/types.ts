@@ -1,4 +1,4 @@
-export type Source = "medium" | "github" | "log";
+export type Source = "medium" | "substack" | "github" | "log";
 
 export type ItemType =
   | "post"

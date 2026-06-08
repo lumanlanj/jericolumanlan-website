@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { readLogEntries } from "@/lib/log";
 import { format, parseISO } from "date-fns";
+import Container from "@/components/Container";
 
 export const revalidate = 0;
 
@@ -8,6 +9,7 @@ export default async function LogPage() {
   const entries = await readLogEntries();
 
   return (
+    <Container>
     <section>
       <header className="mb-6">
         <h1 className="text-[26px] font-bold uppercase tracking-[2.5px] mb-1 text-(--color-ink)">
@@ -35,7 +37,7 @@ export default async function LogPage() {
               >
                 {format(parseISO(e.date), "MMM d, yyyy")}
               </time>
-              <p className="text-[15px] text-[#555] leading-relaxed mt-1.5 line-clamp-2">
+              <p className="text-[15px] text-(--color-bio) leading-relaxed mt-1.5 line-clamp-2">
                 {e.excerpt}
               </p>
             </Link>
@@ -44,5 +46,6 @@ export default async function LogPage() {
         {entries.length === 0 && <li className="text-(--color-muted)">No public log entries yet.</li>}
       </ul>
     </section>
+    </Container>
   );
 }

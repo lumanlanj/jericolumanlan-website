@@ -1,23 +1,35 @@
 import type { Metadata } from "next";
+import { Inter, Fragment_Mono } from "next/font/google";
 import "./globals.css";
-import Sidebar from "@/components/Sidebar";
+import TopNav from "@/components/TopNav";
+
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-inter",
+  display: "swap",
+});
+
+const fragmentMono = Fragment_Mono({
+  weight: "400",
+  subsets: ["latin"],
+  variable: "--font-mono-fragment",
+  display: "swap",
+});
 
 export const metadata: Metadata = {
-  title: "Jerico Lumanlan",
+  title: "Jerico Lumanlan — Product Manager",
   description:
-    "Product manager in climate tech. I write about the craft, build agents I actually use, and treat this site as the working log.",
+    "Jerico Lumanlan is a Product Manager building products across sustainability, ecommerce, and customer experience.",
 };
 
 export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en">
+    <html lang="en" className={`${inter.variable} ${fragmentMono.variable}`}>
       <body className="antialiased">
-        <Sidebar />
-        <main className="ml-0 md:ml-[190px] px-6 py-9 md:px-18 md:py-15">
-          <div className="max-w-[640px]">{children}</div>
-        </main>
+        <TopNav />
+        {children}
       </body>
     </html>
   );

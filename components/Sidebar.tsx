@@ -41,7 +41,7 @@ const EXTERNAL = [
 
 export default function Sidebar() {
   return (
-    <aside className="static md:fixed md:top-0 md:left-0 md:h-screen md:w-[190px] px-7 pt-11 pb-5 md:pb-11 flex md:flex-col gap-0 border-b md:border-b-0 border-(--color-border)">
+    <aside className="fixed top-0 left-0 right-0 z-40 md:right-auto md:z-10 md:h-screen md:w-[190px] bg-cream/80 backdrop-blur-md md:bg-transparent md:backdrop-blur-none px-7 pt-5 md:pt-11 pb-4 md:pb-11 flex md:flex-col gap-0 border-b md:border-b-0 border-(--color-border)">
       <div className="flex flex-col md:mb-9">
         <Link
           href="/"

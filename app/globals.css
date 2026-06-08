@@ -1,34 +1,69 @@
 @import "tailwindcss";
 
 @theme inline {
-  --color-cream: #f0eeea;
-  --color-ink: #1a1a1a;
-  --color-muted: #999999;
-  --color-muted-hover: #555555;
-  --color-bio: #2a2a2a;
-  --color-border: rgba(0, 0, 0, 0.1);
-  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+  /* Dark, editorial palette (yurikim-style structure, cohesive with the orb). */
+  --color-bg: #08080c;
+  --color-bg-soft: #0f0f16;
+  --color-ink: #f3f3f6;
+  --color-muted: #74747f;
+  --color-muted-hover: #b7b7c2;
+  --color-bio: rgba(244, 244, 247, 0.66);
+  --color-border: rgba(255, 255, 255, 0.1);
+  --color-accent: #6ea0ff;
+
+  --font-sans: var(--font-inter), -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+  --font-mono: var(--font-mono-fragment), ui-monospace, SFMono-Regular, Menlo, monospace;
 }
 
 :root {
-  --sidebar-width: 190px;
-  --content-max: 640px;
+  --content-max: 720px;
 }
 
 html {
   font-size: 16px;
+  scroll-behavior: smooth;
+  /* So anchor jumps clear the sticky nav. */
+  scroll-padding-top: 84px;
 }
 
 body {
-  background: var(--color-cream);
+  background: var(--color-bg);
   color: var(--color-ink);
   font-family: var(--font-sans);
-  line-height: 1.65;
+  line-height: 1.6;
   min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
 }
 
-@media (max-width: 700px) {
-  :root {
-    --sidebar-width: 0px;
-  }
+::selection {
+  background: var(--color-accent);
+  color: #08080c;
+}
+
+/* Bouncing scroll cue on the hero. */
+.hero-scroll-cue {
+  animation: hero-bob 2.4s ease-in-out infinite;
+}
+
+@keyframes hero-bob {
+  0%, 100% { transform: translate(-50%, 0); }
+  50% { transform: translate(-50%, 7px); }
+}
+
+/* Rendered markdown (log detail). */
+.prose-content p { margin: 0 0 1.1em; }
+.prose-content a { color: var(--color-accent); text-underline-offset: 3px; }
+.prose-content h2 { font-size: 1.15rem; font-weight: 600; margin: 1.6em 0 0.5em; }
+.prose-content ul { margin: 0 0 1.1em; padding-left: 1.2em; list-style: disc; }
+.prose-content code {
+  font-family: var(--font-mono);
+  font-size: 0.85em;
+  background: var(--color-bg-soft);
+  padding: 0.1em 0.35em;
+  border-radius: 4px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .hero-scroll-cue { animation: none; }
 }
