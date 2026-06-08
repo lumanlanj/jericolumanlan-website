@@ -32,7 +32,7 @@ export default function Hero() {
             Product Manager
           </p>
           <h1 className="text-[34px] leading-[1.08] md:text-[58px] md:leading-[1.04] font-semibold tracking-tight max-w-[16ch]">
-            Hello, I&rsquo;m Jerico.
+            Yo, I&rsquo;m Jerico.
           </h1>
           <p className="mt-4 md:mt-5 text-[16px] md:text-[20px] leading-relaxed text-white/70 max-w-[46ch]">
             I build products across sustainability, ecommerce, and customer
