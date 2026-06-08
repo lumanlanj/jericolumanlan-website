@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 const NAV = [
+  { href: "/", label: "Home" },
   { href: "/#work", label: "Work" },
   { href: "/#writing", label: "Writing" },
   { href: "/#about", label: "About" },
@@ -40,44 +41,44 @@ const EXTERNAL = [
 
 export default function TopNav() {
   return (
-    <header className="fixed top-0 inset-x-0 z-50">
-      <div className="mx-auto max-w-[1100px] px-6 h-[64px] flex items-center justify-between
-                      bg-[rgba(8,8,12,0.6)] backdrop-blur-md border-b border-(--color-border)">
-        <Link
-          href="/"
-          className="text-[15px] font-semibold tracking-tight text-(--color-ink) no-underline hover:opacity-70 transition"
-        >
-          Jerico Lumanlan
-        </Link>
+    <header className="fixed top-4 inset-x-0 z-50 flex justify-center px-4">
+      <nav
+        className="flex items-center gap-1 rounded-full
+                   bg-white/[0.07] backdrop-blur-xl
+                   border border-white/[0.12]
+                   shadow-[0_8px_32px_rgba(0,0,0,0.4)]
+                   px-2 py-1.5"
+      >
+        {NAV.map((l) => (
+          <Link
+            key={l.href}
+            href={l.href}
+            className="px-3.5 sm:px-4 py-1.5 rounded-full text-[13px] sm:text-[14px]
+                       text-(--color-muted) hover:text-(--color-ink) hover:bg-white/[0.08]
+                       transition no-underline"
+          >
+            {l.label}
+          </Link>
+        ))}
 
-        <nav className="flex items-center gap-4 sm:gap-6">
-          <div className="flex items-center gap-4 sm:gap-6">
-            {NAV.map((l) => (
-              <Link
-                key={l.href}
-                href={l.href}
-                className="text-[13px] sm:text-[14px] text-(--color-muted) hover:text-(--color-ink) transition no-underline"
-              >
-                {l.label}
-              </Link>
-            ))}
-          </div>
-          <div className="hidden sm:flex items-center gap-3.5 sm:pl-6 sm:border-l border-(--color-border)">
-            {EXTERNAL.map((e) => (
-              <a
-                key={e.href}
-                href={e.href}
-                target="_blank"
-                rel="noopener"
-                aria-label={e.label}
-                className="text-(--color-muted) hover:text-(--color-ink) transition flex items-center"
-              >
-                {e.svg}
-              </a>
-            ))}
-          </div>
-        </nav>
-      </div>
+        <span className="hidden sm:block mx-1.5 h-4 w-px bg-white/[0.14]" aria-hidden="true" />
+
+        <div className="hidden sm:flex items-center gap-1 pr-1">
+          {EXTERNAL.map((e) => (
+            <a
+              key={e.href}
+              href={e.href}
+              target="_blank"
+              rel="noopener"
+              aria-label={e.label}
+              className="p-2 rounded-full text-(--color-muted) hover:text-(--color-ink)
+                         hover:bg-white/[0.08] transition flex items-center"
+            >
+              {e.svg}
+            </a>
+          ))}
+        </div>
+      </nav>
     </header>
   );
 }
