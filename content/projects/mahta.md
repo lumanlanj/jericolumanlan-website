@@ -4,6 +4,9 @@ description: "An AI product analyst. Name a company and a flow — say, Amazon's
 status: wip
 order: 3
 date: 2026-06-07
+links:
+  - label: Visit Mahta
+    url: https://mahta.space
 ---
 
 Mahta turns a competitive teardown into a one-line request. Name a company and a flow — *Amazon's Subscribe & Save enrollment* — and it researches the program, then drives a real browser through the actual experience, step by step.

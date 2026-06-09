@@ -295,3 +295,34 @@ figcaption.flag::before { content: ""; width: 4px; height: 4px; border-radius: 5
   .mq-dot { animation: none; }
   .mq-work, .mq-report, .rep-list li, .storyboard figure, .bp-flag, .mq-prog i, .bp-top { transition: none; }
 }
+
+/* ============================================================
+   Project callout — "Visit Mahta ↗" pill under the description.
+   Append to app/globals.css. Renders on any featured project row
+   that defines a front-matter `links` entry (today: Mahta only).
+   Uses existing tokens: --color-border, --color-ink, --mahta, --font-mono.
+   ============================================================ */
+.work-cta {
+  align-self: flex-start;
+  margin-top: 14px;
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  padding: 9px 16px;
+  border-radius: 9999px;
+  border: 1px solid var(--color-border);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--color-ink);
+  text-decoration: none;
+  transition: color .2s, border-color .2s, background .2s;
+}
+.work-cta .cta-arrow { transition: transform .2s; }
+.work-cta:hover {
+  color: var(--mahta);
+  border-color: color-mix(in oklab, var(--mahta) 55%, transparent);
+  background: color-mix(in oklab, var(--mahta) 12%, transparent);
+}
+.work-cta:hover .cta-arrow { transform: translate(2px, -2px); }

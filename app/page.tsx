@@ -109,6 +109,18 @@ export default async function Home() {
                           ))}
                         </ul>
                       )}
+                      {/* Optional callout — renders when the project defines a front-matter link. */}
+                      {href && (
+                        <a
+                          href={href}
+                          target={external ? "_blank" : undefined}
+                          rel={external ? "noopener" : undefined}
+                          className="work-cta"
+                        >
+                          {p.links?.[0]?.label ?? `Visit ${p.title}`}
+                          <span className="cta-arrow" aria-hidden="true">↗</span>
+                        </a>
+                      )}
                     </div>
                     {Demo()}
                   </div>
