@@ -53,9 +53,7 @@ export default function Hero() {
           </p>
           <div className="mt-6 space-y-2 font-mono text-[12px] uppercase tracking-[0.12em] text-white/45">
             <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
-              <span>Now @ Xpansiv</span>
-              <span className="text-white/25">/</span>
-              <span>Managed Solutions, Clean Transportation</span>
+              <span>Now @ Xpansiv, Managed Solutions, Clean Transportation</span>
             </div>
             <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
               <span>Previously Spotify, Staples</span>
