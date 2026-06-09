@@ -1,4 +1,16 @@
+"use client";
+
 import Link from "next/link";
+import { track } from "@vercel/analytics";
+
+// Fire the resume-download conversion to both analytics sinks the site uses:
+// Vercel Web Analytics (custom event) and Microsoft Clarity (custom event).
+function trackResumeDownload() {
+  track("resume_download");
+  (
+    window as typeof window & { clarity?: (...args: unknown[]) => void }
+  ).clarity?.("event", "resume_download");
+}
 
 const NAV = [
   { href: "/", label: "Home" },
@@ -60,6 +72,17 @@ export default function TopNav() {
             {l.label}
           </Link>
         ))}
+
+        <a
+          href="/Jerico-Lumanlan-Resume.pdf"
+          download="Jerico Lumanlan Resume.pdf"
+          onClick={trackResumeDownload}
+          className="px-3.5 sm:px-4 py-2 sm:py-1.5 rounded-full text-[13px] sm:text-[14px]
+                     text-(--color-muted) hover:text-(--color-ink) hover:bg-white/[0.08]
+                     transition no-underline"
+        >
+          Resume
+        </a>
 
         <span className="hidden sm:block mx-1.5 h-4 w-px bg-white/[0.14]" aria-hidden="true" />
 

@@ -16,6 +16,19 @@ export default function Hero() {
     >
       <IcosahedronCanvas />
 
+      {/* Orb interaction hint — slides down from under the nav, holds, then leaves once on load. */}
+      <div className="orb-hint" aria-hidden="true">
+        <span className="orb-hint-hand">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <path d="M18 11V6a2 2 0 0 0-2-2 2 2 0 0 0-2 2 2 2 0 0 0-2-2 2 2 0 0 0-2 2v0a2 2 0 0 0-2-2 2 2 0 0 0-2 2v8" />
+            <path d="M14 10V4a2 2 0 0 0-2-2 2 2 0 0 0-2 2v2M10 10.5V6a2 2 0 0 0-2-2 2 2 0 0 0-2 2v8a8 8 0 0 0 8 8h2a8 8 0 0 0 8-8v-1a2 2 0 0 0-2-2 2 2 0 0 0-2 2" />
+          </svg>
+        </span>
+        <span>Drag to rotate</span>
+        <span className="orb-hint-dot" />
+        <span>Double-click to shift</span>
+      </div>
+
       {/* Legibility scrim behind the intro. */}
       <div
         className="pointer-events-none absolute inset-0"

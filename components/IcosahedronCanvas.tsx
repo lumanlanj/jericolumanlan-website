@@ -421,6 +421,7 @@ export default function IcosahedronCanvas() {
     const onPointerDown = (e: PointerEvent) => {
       if (e.button !== undefined && e.button !== 0) return;
       dragging = true;
+      mount.style.cursor = "grabbing";
       lastPX = downX = e.clientX;
       lastPY = downY = e.clientY;
       lastT = now();
@@ -428,6 +429,7 @@ export default function IcosahedronCanvas() {
 
     const endDrag = () => {
       dragging = false;
+      mount.style.cursor = "";
     };
 
     const onPointerUp = (e: PointerEvent) => {
@@ -573,7 +575,7 @@ export default function IcosahedronCanvas() {
   return (
     <div
       ref={mountRef}
-      className="absolute inset-0 touch-pan-y"
+      className="absolute inset-0 touch-pan-y cursor-grab"
       aria-hidden="true"
     />
   );
