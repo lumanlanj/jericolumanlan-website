@@ -1,0 +1,83 @@
+name: Update OG preview image
+
+# Whenever the hero (or anything that changes how it looks) lands on main,
+# regenerate public/og.png from the live hero and commit it back, so the social
+# preview never goes stale. Loop-safe: og.png isn't in the trigger paths, so the
+# bot's own commit doesn't re-run this.
+on:
+  push:
+    branches: [main]
+    paths:
+      - "components/Hero.tsx"
+      - "components/IcosahedronCanvas.tsx"
+      - "components/TopNav.tsx"
+      - "app/page.tsx"
+      - "app/globals.css"
+      - "scripts/gen-og.mjs"
+      - ".github/workflows/og-image.yml"
+  workflow_dispatch: {} # allow manual runs
+
+permissions:
+  contents: write
+
+concurrency:
+  group: og-image
+  cancel-in-progress: true
+
+jobs:
+  og:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - run: npm ci
+      - name: Install Chromium for Playwright
+        run: npx playwright install --with-deps chromium
+
+      - name: Build & start the site (production — no dev overlay in the shot)
+        run: |
+          npm run build
+          npm run start &
+          # Wait until the production server answers.
+          for i in $(seq 1 60); do
+            if curl -fsS http://localhost:3000/ >/dev/null 2>&1; then echo "ready"; break; fi
+            sleep 2
+          done
+
+      - name: Screenshot hero → public/og.png
+        env:
+          OG_URL: http://localhost:3000/
+          OG_HEADED: "1" # headed under xvfb → reliable WebGL render of the orb
+        run: xvfb-run -a npm run og:gen
+
+      # Always keep the generated image as an artifact so any run is inspectable.
+      - uses: actions/upload-artifact@v4
+        with:
+          name: og-image
+          path: public/og.png
+
+      - name: Commit updated preview (if changed)
+        run: |
+          # Safety: a failed WebGL render yields a near-empty image. The real
+          # orb card is ~1MB; bail (don't ship a blank) if it's improbably small.
+          size=$(stat -c%s public/og.png)
+          echo "Generated og.png is $size bytes."
+          if [ "$size" -lt 300000 ]; then
+            echo "::error::OG image looks blank ($size bytes) — refusing to commit."
+            exit 1
+          fi
+          # Author must be the Vercel-allowed identity or the resulting deploy is blocked.
+          git config user.name "Jerico Lumanlan"
+          git config user.email "50778090+lumanlanj@users.noreply.github.com"
+          if git diff --quiet -- public/og.png; then
+            echo "OG image unchanged — nothing to commit."
+          else
+            git add public/og.png
+            git commit -m "chore(og): auto-update social preview from hero [skip ci]"
+            git push
+            echo "Committed refreshed og.png."
+          fi

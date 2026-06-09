@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "lint:log": "node scripts/lint-log.mjs"
+    "lint:log": "node scripts/lint-log.mjs",
+    "og:gen": "node scripts/gen-og.mjs"
   },
   "dependencies": {
     "@octokit/graphql": "^8.1.1",
@@ -31,6 +32,7 @@
     "@types/three": "^0.184.1",
     "eslint": "^9",
     "eslint-config-next": "16.2.6",
+    "playwright": "^1.60.0",
     "tailwindcss": "^4",
     "typescript": "^5"
   }
