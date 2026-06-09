@@ -17,10 +17,10 @@ function trackResumeDownload() {
 
 const NAV = [
   { href: "/", label: "Home" },
+  { href: "/#about", label: "About" },
   { href: "/#work", label: "Work" },
   { href: "/#writing", label: "Writing" },
   { href: "/#design", label: "Design" },
-  { href: "/#about", label: "About" },
 ];
 
 const EXTERNAL = [
