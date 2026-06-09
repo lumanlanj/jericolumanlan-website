@@ -1,11 +1,11 @@
 ---
 title: Mahta
-description: A macOS desktop voice companion for UX competitive audits. It watches your screen while you browse a competitor, listens to your commentary, and helps you reason about the experience out loud — say "Hey Mahta," and it captures what you're looking at and talks through the UX with you.
+description: "An AI product analyst. Name a company and a flow — say, Amazon's Subscribe & Save enrollment — and Mahta researches the program, drives a real browser through the experience step by step, and returns a two-layer report: a Market & Strategy brief, then an annotated storyboard of the real journey with every point of friction, persuasion, and gating flagged on the exact screen where it happens. Hours of competitive teardown, in minutes."
 status: wip
 order: 3
 date: 2026-06-07
 ---
 
-Mahta turns a competitive UX audit into a conversation. You declare who you're looking at — "Hey Mahta, I'm looking at [competitor]" — then browse their product while Mahta quietly captures what's on screen. Ask "what do you see?" and it analyzes the screenshot and walks through the UX with you. It stays silent until invoked, keeps a session history per competitor, and holds context across a research session.
+Mahta turns a competitive teardown into a one-line request. Name a company and a flow — *Amazon's Subscribe & Save enrollment* — and it researches the program, then drives a real browser through the actual experience, step by step.
 
-It's a voice-first Electron desktop app with screen-vision analysis. I rebuilt the backend on top of the Claude subscription CLI to drop the per-call API burn rate. Still rough around the edges, but it already replaces the screenshot-and-notes grind I used to do by hand.
+What comes back is a two-layer report. First, a **Market & Strategy** brief: how the program works, the business mechanics behind it, what customers are actually saying, and the latest news. Then an **annotated storyboard** of the real journey, with every point of friction, persuasion, and gating flagged on the exact screen where it happens — hours of teardown work, done in minutes while you do something else.

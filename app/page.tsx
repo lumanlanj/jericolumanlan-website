@@ -4,6 +4,8 @@ import { fetchSubstack } from "@/lib/substack";
 import { mergeWriting } from "@/lib/writing";
 import { readProjects } from "@/lib/projects";
 import Hero from "@/components/Hero";
+import CarlDemo from "@/components/CarlDemo";
+import MahtaDemo from "@/components/MahtaDemo";
 import type { Project } from "@/lib/types";
 
 export const revalidate = 0;
@@ -12,6 +14,12 @@ const STATUS_LABEL: Record<Project["status"], string> = {
   live: "Shipped",
   wip: "In progress",
   archived: "Archive",
+};
+
+// Project slugs that render as a featured row with an interactive demo.
+const DEMOS: Record<string, () => React.ReactNode> = {
+  carl: () => <CarlDemo />,
+  mahta: () => <MahtaDemo />,
 };
 
 export default async function Home() {
@@ -57,11 +65,42 @@ export default async function Home() {
             const href = p.links?.[0]?.url;
             const external = href?.startsWith("http");
             const year = p.date?.slice(0, 4);
+            const meta = `${STATUS_LABEL[p.status]}${year ? ` · ${year}` : ""}`;
+
+            // ---- Featured rows: a copy column + an interactive demo. ----
+            // Carl renders copy-left / demo-right; Mahta swaps sides via the
+            // `.work-item--mahta .mahta-demo { order: -1 }` rule in globals.css.
+            const Demo = DEMOS[p.slug];
+            if (Demo) {
+              return (
+                <div key={p.slug} className="py-11 first:pt-0">
+                  <div
+                    className={`work-item--featured${
+                      p.slug === "mahta" ? " work-item--mahta" : ""
+                    }`}
+                  >
+                    <div className="work-copy">
+                      <span className="font-mono text-[11px] uppercase tracking-[0.16em] text-(--color-muted)">
+                        {meta}
+                      </span>
+                      <h3 className="text-[22px] md:text-[26px] font-semibold tracking-tight text-(--color-ink)">
+                        {p.title}
+                      </h3>
+                      <p className="work-desc text-[15px] md:text-[16px] leading-relaxed text-(--color-bio)">
+                        {p.description}
+                      </p>
+                    </div>
+                    {Demo()}
+                  </div>
+                </div>
+              );
+            }
+
+            // ---- Standard rows (no demo). ----
             const Inner = (
               <div className="group flex flex-col gap-2">
                 <span className="font-mono text-[11px] uppercase tracking-[0.16em] text-(--color-muted)">
-                  {STATUS_LABEL[p.status]}
-                  {year ? ` · ${year}` : ""}
+                  {meta}
                 </span>
                 <h3 className="text-[22px] md:text-[26px] font-semibold tracking-tight text-(--color-ink) flex items-center gap-2">
                   {p.title}
@@ -82,12 +121,12 @@ export default async function Home() {
                 href={href}
                 target={external ? "_blank" : undefined}
                 rel={external ? "noopener" : undefined}
-                className="block no-underline py-7 first:pt-0"
+                className="block no-underline py-11 first:pt-0"
               >
                 {Inner}
               </a>
             ) : (
-              <div key={p.slug} className="py-7 first:pt-0">{Inner}</div>
+              <div key={p.slug} className="py-11 first:pt-0">{Inner}</div>
             );
           })}
         </div>

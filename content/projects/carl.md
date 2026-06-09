@@ -1,6 +1,6 @@
 ---
 title: Carl
-description: iMessage-based personal assistant running on a Mac Mini, powered by the Claude CLI subscription. 85 MCP tools wired to Gmail, Calendar, GitHub, Drive, and Sheets.
+description: "A personal assistant that lives in iMessage — 85 MCP tools wired to Gmail, Calendar, GitHub, Drive, and Sheets. Text it a screenshot and it gets the job done."
 status: live
 order: 1
 date: 2026-05-26
