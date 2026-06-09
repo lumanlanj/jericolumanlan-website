@@ -3,9 +3,11 @@ import { fetchMedium } from "@/lib/medium";
 import { fetchSubstack } from "@/lib/substack";
 import { mergeWriting } from "@/lib/writing";
 import { readProjects } from "@/lib/projects";
+import { readShots } from "@/lib/dribbble";
 import Hero from "@/components/Hero";
 import CarlDemo from "@/components/CarlDemo";
 import MahtaDemo from "@/components/MahtaDemo";
+import DribbbleGallery from "@/components/DribbbleGallery";
 import type { Project } from "@/lib/types";
 
 export const revalidate = 0;
@@ -23,12 +25,14 @@ const DEMOS: Record<string, () => React.ReactNode> = {
 };
 
 export default async function Home() {
-  const [projects, medium, substack] = await Promise.all([
+  const [projects, medium, substack, shots] = await Promise.all([
     readProjects(),
     fetchMedium(),
     fetchSubstack(),
+    readShots(),
   ]);
   const recentWriting = mergeWriting(medium, substack).slice(0, 5);
+  const featuredShots = shots.slice(0, 6);
 
   return (
     <>
@@ -169,6 +173,21 @@ export default async function Home() {
           </Link>
         </div>
       </Section>
+
+      {/* DESIGN */}
+      {featuredShots.length > 0 && (
+        <Section id="design" eyebrow="Design Exploration">
+          <DribbbleGallery shots={featuredShots} />
+          <div className="mt-9">
+            <Link
+              href="/design"
+              className="font-mono text-[12px] uppercase tracking-[0.14em] text-(--color-muted) hover:text-(--color-ink) transition no-underline"
+            >
+              All design exploration →
+            </Link>
+          </div>
+        </Section>
+      )}
 
       <Footer />
     </>
