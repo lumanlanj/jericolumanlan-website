@@ -4,12 +4,18 @@ import { useEffect, useRef } from "react";
 import * as THREE from "three";
 
 /**
- * Icosahedron hero: thousands of glowing red particles scattered across the 20
- * triangular faces of an icosahedron, shaded by their flat face normals so the
- * facets read. It tumbles slowly and follows the cursor — a solid rotation, not
- * a 4D fold. Additive blending makes the silhouette glow.
+ * Particle-solid hero: thousands of glowing red particles scattered across the
+ * faces of a regular solid, shaded by their flat face normals so the facets
+ * read. Additive blending makes the silhouette glow.
  *
- * prefers-reduced-motion → one static frame. Pauses when hidden / offscreen.
+ * Interactions:
+ *  - drag to spin (with inertia that eases back into a slow auto-tumble),
+ *  - double-click / double-tap to morph between shapes (icosahedron →
+ *    dodecahedron → sphere → …), and
+ *  - the cursor bulges + brightens the particles nearest it.
+ *
+ * prefers-reduced-motion → one static frame, no loop, no spin. Pauses when
+ * hidden / offscreen.
  */
 export default function IcosahedronCanvas() {
   const mountRef = useRef<HTMLDivElement>(null);
@@ -52,78 +58,134 @@ export default function IcosahedronCanvas() {
     const isSmall = window.innerWidth < 768;
     const COUNT = isSmall ? 7000 : 14000;
 
-    // --- Icosahedron surface point cloud ------------------------------------
-    const source = new THREE.IcosahedronGeometry(1.12, 0);
-    const srcPos = source.getAttribute("position").array as Float32Array;
-    const srcNrm = source.getAttribute("normal").array as Float32Array;
-    const triCount = srcPos.length / 9; // non-indexed: 9 floats per triangle
-
-    // deterministic PRNG (no Math.random — keeps SSR/resume calm)
-    let seed = 0x9e3779b9;
-    const rng = () => {
-      seed = (seed + 0x6d2b79f5) | 0;
-      let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
-      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
-      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    // --- Shape point clouds -------------------------------------------------
+    // Each shape provides COUNT (position, face-normal) pairs so we can morph
+    // particle-for-particle between them. Correspondence is arbitrary — points
+    // simply fly from one shape's slot to the next, which reads as a reform.
+    const makeRng = (seedInit: number) => {
+      let seed = seedInit;
+      return () => {
+        seed = (seed + 0x6d2b79f5) | 0;
+        let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+        t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+        return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+      };
     };
 
-    const areas = new Float32Array(triCount);
-    let totalArea = 0;
-    const va = new THREE.Vector3(),
-      vb = new THREE.Vector3(),
-      vc = new THREE.Vector3();
-    for (let t = 0; t < triCount; t++) {
-      const o = t * 9;
-      va.set(srcPos[o], srcPos[o + 1], srcPos[o + 2]);
-      vb.set(srcPos[o + 3], srcPos[o + 4], srcPos[o + 5]);
-      vc.set(srcPos[o + 6], srcPos[o + 7], srcPos[o + 8]);
-      const area = vb.clone().sub(va).cross(vc.clone().sub(va)).length() * 0.5;
-      areas[t] = area;
-      totalArea += area;
-    }
-
-    const positions = new Float32Array(COUNT * 3);
-    const normals = new Float32Array(COUNT * 3);
-    const rand = new Float32Array(COUNT);
-    let p = 0;
-    for (let t = 0; t < triCount && p < COUNT; t++) {
-      const o = t * 9;
-      const share =
-        t === triCount - 1
-          ? COUNT - p
-          : Math.round((areas[t] / totalArea) * COUNT);
-      const nx = srcNrm[o],
-        ny = srcNrm[o + 1],
-        nz = srcNrm[o + 2];
-      for (let k = 0; k < share && p < COUNT; k++, p++) {
-        let u = rng(),
-          v = rng();
-        if (u + v > 1) {
-          u = 1 - u;
-          v = 1 - v;
-        }
-        const w = 1 - u - v;
-        positions[p * 3] = srcPos[o] * w + srcPos[o + 3] * u + srcPos[o + 6] * v;
-        positions[p * 3 + 1] =
-          srcPos[o + 1] * w + srcPos[o + 4] * u + srcPos[o + 7] * v;
-        positions[p * 3 + 2] =
-          srcPos[o + 2] * w + srcPos[o + 5] * u + srcPos[o + 8] * v;
-        normals[p * 3] = nx;
-        normals[p * 3 + 1] = ny;
-        normals[p * 3 + 2] = nz;
-        rand[p] = rng();
+    const samplePoly = (
+      geometry: THREE.BufferGeometry,
+      count: number,
+      rng: () => number
+    ) => {
+      const sp = geometry.getAttribute("position").array as Float32Array;
+      const sn = geometry.getAttribute("normal").array as Float32Array;
+      const tris = sp.length / 9;
+      const areas = new Float32Array(tris);
+      let total = 0;
+      const a = new THREE.Vector3(),
+        b = new THREE.Vector3(),
+        c = new THREE.Vector3();
+      for (let t = 0; t < tris; t++) {
+        const o = t * 9;
+        a.set(sp[o], sp[o + 1], sp[o + 2]);
+        b.set(sp[o + 3], sp[o + 4], sp[o + 5]);
+        c.set(sp[o + 6], sp[o + 7], sp[o + 8]);
+        const ar = b.clone().sub(a).cross(c.clone().sub(a)).length() * 0.5;
+        areas[t] = ar;
+        total += ar;
       }
+      const pos = new Float32Array(count * 3);
+      const nrm = new Float32Array(count * 3);
+      let p = 0;
+      for (let t = 0; t < tris && p < count; t++) {
+        const o = t * 9;
+        const share =
+          t === tris - 1 ? count - p : Math.round((areas[t] / total) * count);
+        const nx = sn[o],
+          ny = sn[o + 1],
+          nz = sn[o + 2];
+        for (let k = 0; k < share && p < count; k++, p++) {
+          let u = rng(),
+            v = rng();
+          if (u + v > 1) {
+            u = 1 - u;
+            v = 1 - v;
+          }
+          const w = 1 - u - v;
+          pos[p * 3] = sp[o] * w + sp[o + 3] * u + sp[o + 6] * v;
+          pos[p * 3 + 1] = sp[o + 1] * w + sp[o + 4] * u + sp[o + 7] * v;
+          pos[p * 3 + 2] = sp[o + 2] * w + sp[o + 5] * u + sp[o + 8] * v;
+          nrm[p * 3] = nx;
+          nrm[p * 3 + 1] = ny;
+          nrm[p * 3 + 2] = nz;
+        }
+      }
+      geometry.dispose();
+      return { pos, nrm };
+    };
+
+    const sampleSphere = (count: number, radius: number) => {
+      const pos = new Float32Array(count * 3);
+      const nrm = new Float32Array(count * 3);
+      const golden = Math.PI * (3 - Math.sqrt(5));
+      for (let i = 0; i < count; i++) {
+        const y = 1 - (i / (count - 1)) * 2;
+        const r = Math.sqrt(Math.max(0, 1 - y * y));
+        const th = golden * i;
+        const dx = Math.cos(th) * r,
+          dz = Math.sin(th) * r;
+        pos[i * 3] = dx * radius;
+        pos[i * 3 + 1] = y * radius;
+        pos[i * 3 + 2] = dz * radius;
+        nrm[i * 3] = dx;
+        nrm[i * 3 + 1] = y;
+        nrm[i * 3 + 2] = dz;
+      }
+      return { pos, nrm };
+    };
+
+    const rng = makeRng(0x9e3779b9);
+    const SHAPES = [
+      samplePoly(new THREE.IcosahedronGeometry(1.12, 0), COUNT, rng),
+      samplePoly(new THREE.DodecahedronGeometry(1.18, 0), COUNT, rng),
+      sampleSphere(COUNT, 1.06),
+    ];
+    let shapeIndex = 0;
+
+    // A = current shape, B = morph target; u_morph blends A→B in the shader.
+    const posA = SHAPES[0].pos.slice();
+    const nrmA = SHAPES[0].nrm.slice();
+    const posB = SHAPES[0].pos.slice();
+    const nrmB = SHAPES[0].nrm.slice();
+
+    const attrPosA = new THREE.BufferAttribute(posA, 3);
+    const attrNrmA = new THREE.BufferAttribute(nrmA, 3);
+    const attrPosB = new THREE.BufferAttribute(posB, 3);
+    const attrNrmB = new THREE.BufferAttribute(nrmB, 3);
+
+    const rand = new Float32Array(COUNT);
+    for (let i = 0; i < COUNT; i++) {
+      rand[i] = (Math.sin(i * 12.9898) * 43758.5453) % 1;
+      if (rand[i] < 0) rand[i] += 1;
     }
-    source.dispose();
 
     const geo = new THREE.BufferGeometry();
-    geo.setAttribute("position", new THREE.BufferAttribute(positions, 3));
-    geo.setAttribute("a_normal", new THREE.BufferAttribute(normals, 3));
+    // `position` exists only so three knows the point count; the shader builds
+    // the real position from a_posA/a_posB.
+    geo.setAttribute(
+      "position",
+      new THREE.BufferAttribute(new Float32Array(COUNT * 3), 3)
+    );
+    geo.setAttribute("a_posA", attrPosA);
+    geo.setAttribute("a_nrmA", attrNrmA);
+    geo.setAttribute("a_posB", attrPosB);
+    geo.setAttribute("a_nrmB", attrNrmB);
     geo.setAttribute("a_rand", new THREE.BufferAttribute(rand, 1));
 
     const uniforms = {
       u_time: { value: 0 },
       u_dpr: { value: DPR },
+      u_morph: { value: 0 },
       u_mouseView: { value: new THREE.Vector2(0, 0) },
     };
 
@@ -183,15 +245,22 @@ export default function IcosahedronCanvas() {
       vertexShader: /* glsl */ `
         uniform float u_time;
         uniform float u_dpr;
+        uniform float u_morph;
         uniform vec2 u_mouseView;
         attribute float a_rand;
-        attribute vec3 a_normal;
+        attribute vec3 a_posA;
+        attribute vec3 a_posB;
+        attribute vec3 a_nrmA;
+        attribute vec3 a_nrmB;
         varying float vBright;
         ${NOISE_GLSL}
         void main(){
-          vec3 nrm = normalize(a_normal);
-          float n = snoise(position * 1.6 + vec3(0.0, 0.0, u_time * 0.14));
-          vec3 pos = position + nrm * n * 0.045;
+          // Blend between the current shape (A) and the morph target (B).
+          vec3 P = mix(a_posA, a_posB, u_morph);
+          vec3 nrm = normalize(mix(a_nrmA, a_nrmB, u_morph));
+
+          float n = snoise(P * 1.6 + vec3(0.0, 0.0, u_time * 0.14));
+          vec3 pos = P + nrm * n * 0.045;
 
           vec4 mv = modelViewMatrix * vec4(pos, 1.0);
           vec3 vn = normalize(normalMatrix * nrm);
@@ -204,6 +273,9 @@ export default function IcosahedronCanvas() {
           float push = smoothstep(0.5, 0.0, d) * 0.32;
           mv.xyz += vn * push;
           vBright += push * 1.4;
+
+          // Mid-morph sparkle so the reform reads as energetic.
+          vBright += sin(u_morph * 3.14159) * 0.35;
 
           gl_Position = projectionMatrix * mv;
           float twinkle = 0.85 + 0.3 * sin(u_time * 1.5 + a_rand * 30.0);
@@ -228,6 +300,7 @@ export default function IcosahedronCanvas() {
     });
 
     const solid = new THREE.Points(geo, material);
+    solid.frustumCulled = false; // dummy `position` => skip bounding-sphere cull
     solid.position.y = 0.32;
     scene.add(solid);
 
@@ -280,9 +353,48 @@ export default function IcosahedronCanvas() {
     };
     applyLayout();
 
+    // --- Shape morphing -----------------------------------------------------
+    const MORPH_DUR = 0.95; // seconds
+    let morphing = false;
+    let morphT = 0;
+    const smoothstep = (x: number) => x * x * (3 - 2 * x);
+
+    const cycleShape = () => {
+      if (morphing) return;
+      const next = (shapeIndex + 1) % SHAPES.length;
+      posB.set(SHAPES[next].pos);
+      nrmB.set(SHAPES[next].nrm);
+      attrPosB.needsUpdate = true;
+      attrNrmB.needsUpdate = true;
+      morphing = true;
+      morphT = 0;
+      shapeIndex = next;
+      if (!running) start(); // wake the loop if it was idle
+    };
+
+    // --- Drag-to-spin + inertia + cursor bulge ------------------------------
     const targetMouse = new THREE.Vector2(0, 0);
     const smoothMouse = new THREE.Vector2(0, 0);
     const halfTan = Math.tan((FOV * Math.PI) / 180 / 2);
+
+    const AUTO_X = 0.05,
+      AUTO_Y = 0.12; // idle tumble (rad/s)
+    const SENS = 0.006; // rad per px of drag
+    const MAX_VEL = 8; // clamp fling speed (rad/s)
+    const DECAY_TAU = 0.7; // inertia → auto ease (s)
+    let rotX = 0,
+      rotY = 0,
+      velX = AUTO_X,
+      velY = AUTO_Y;
+    let dragging = false;
+    let lastPX = 0,
+      lastPY = 0,
+      lastT = 0,
+      downX = 0,
+      downY = 0,
+      lastTapT = 0;
+
+    const now = () => performance.now();
 
     const onPointerMove = (e: PointerEvent) => {
       const r = mount.getBoundingClientRect();
@@ -290,11 +402,57 @@ export default function IcosahedronCanvas() {
         ((e.clientX - r.left) / r.width) * 2 - 1,
         -(((e.clientY - r.top) / r.height) * 2 - 1)
       );
+      if (dragging) {
+        const t = now();
+        const dt = Math.max(8, t - lastT) / 1000;
+        const dx = e.clientX - lastPX;
+        const dy = e.clientY - lastPY;
+        rotY += dx * SENS;
+        rotX += dy * SENS;
+        const clamp = (v: number) => Math.max(-MAX_VEL, Math.min(MAX_VEL, v));
+        velY = clamp(velY * 0.4 + (dx * SENS) / dt * 0.6);
+        velX = clamp(velX * 0.4 + (dy * SENS) / dt * 0.6);
+        lastPX = e.clientX;
+        lastPY = e.clientY;
+        lastT = t;
+      }
     };
-    const recenter = () => targetMouse.set(0, 0);
+
+    const onPointerDown = (e: PointerEvent) => {
+      if (e.button !== undefined && e.button !== 0) return;
+      dragging = true;
+      lastPX = downX = e.clientX;
+      lastPY = downY = e.clientY;
+      lastT = now();
+    };
+
+    const endDrag = () => {
+      dragging = false;
+    };
+
     const onPointerUp = (e: PointerEvent) => {
-      if (e.pointerType === "touch") recenter();
+      if (dragging) endDrag();
+      const moved =
+        Math.abs(e.clientX - downX) + Math.abs(e.clientY - downY);
+      // Double-tap (touch) → cycle shape. Mouse uses native dblclick below.
+      if (e.pointerType === "touch") {
+        const t = now();
+        if (t - lastTapT < 320 && moved < 14) {
+          cycleShape();
+          lastTapT = 0;
+        } else {
+          lastTapT = t;
+        }
+        if (moved < 6) targetMouse.set(0, 0); // relax bulge on a clean tap
+      }
     };
+
+    const onPointerCancel = () => {
+      endDrag();
+      targetMouse.set(0, 0);
+    };
+    const onDblClick = () => cycleShape();
+
     const onResize = () => {
       const w = mount.clientWidth;
       const h = mount.clientHeight;
@@ -303,27 +461,56 @@ export default function IcosahedronCanvas() {
       camera.updateProjectionMatrix();
       applyLayout();
     };
+
+    mount.addEventListener("pointerdown", onPointerDown, { passive: true });
+    mount.addEventListener("dblclick", onDblClick);
     window.addEventListener("pointermove", onPointerMove, { passive: true });
     window.addEventListener("pointerup", onPointerUp, { passive: true });
-    window.addEventListener("pointercancel", onPointerUp, { passive: true });
-    mount.addEventListener("pointerleave", recenter, { passive: true });
+    window.addEventListener("pointercancel", onPointerCancel, { passive: true });
     window.addEventListener("resize", onResize);
 
+    // --- Render loop with pausing -------------------------------------------
     const clock = new THREE.Clock();
+    let prevT = 0;
     let raf = 0;
     let running = true;
 
     const renderFrame = () => {
       smoothMouse.lerp(targetMouse, 0.05);
       const tEl = clock.getElapsedTime();
+      const dt = Math.min(0.05, tEl - prevT);
+      prevT = tEl;
+
       uniforms.u_time.value = tEl;
       uniforms.u_mouseView.value.set(
         smoothMouse.x * halfTan * camera.aspect,
         smoothMouse.y * halfTan
       );
 
-      solid.rotation.y = tEl * 0.12 + smoothMouse.x * 0.5;
-      solid.rotation.x = tEl * 0.05 - smoothMouse.y * 0.35;
+      if (morphing) {
+        morphT += dt / MORPH_DUR;
+        if (morphT >= 1) {
+          // Land on B: copy it into A and reset the blend so A is shown.
+          posA.set(SHAPES[shapeIndex].pos);
+          nrmA.set(SHAPES[shapeIndex].nrm);
+          attrPosA.needsUpdate = true;
+          attrNrmA.needsUpdate = true;
+          uniforms.u_morph.value = 0;
+          morphing = false;
+        } else {
+          uniforms.u_morph.value = smoothstep(morphT);
+        }
+      }
+
+      // Spin: drag controls rotation directly; otherwise inertia decays to auto.
+      if (!dragging) {
+        const k = 1 - Math.exp(-dt / DECAY_TAU);
+        velX += (AUTO_X - velX) * k;
+        velY += (AUTO_Y - velY) * k;
+        rotX += velX * dt;
+        rotY += velY * dt;
+      }
+      solid.rotation.set(rotX, rotY, 0);
 
       renderer.render(scene, camera);
     };
@@ -334,24 +521,26 @@ export default function IcosahedronCanvas() {
       raf = requestAnimationFrame(loop);
     };
 
+    function start() {
+      if (running || reduceMotion) return;
+      running = true;
+      clock.start();
+      loop();
+    }
+    const stop = () => {
+      if (!running) return;
+      running = false;
+      cancelAnimationFrame(raf);
+    };
+
     if (reduceMotion) {
+      running = false;
       uniforms.u_time.value = 6.0;
       renderFrame();
     } else {
       loop();
     }
 
-    const stop = () => {
-      if (!running) return;
-      running = false;
-      cancelAnimationFrame(raf);
-    };
-    const start = () => {
-      if (running || reduceMotion) return;
-      running = true;
-      clock.start();
-      loop();
-    };
     const onVisibility = () => (document.hidden ? stop() : start());
     document.addEventListener("visibilitychange", onVisibility);
     const io = new IntersectionObserver(
@@ -364,10 +553,11 @@ export default function IcosahedronCanvas() {
       stop();
       io.disconnect();
       document.removeEventListener("visibilitychange", onVisibility);
+      mount.removeEventListener("pointerdown", onPointerDown);
+      mount.removeEventListener("dblclick", onDblClick);
       window.removeEventListener("pointermove", onPointerMove);
       window.removeEventListener("pointerup", onPointerUp);
-      window.removeEventListener("pointercancel", onPointerUp);
-      mount.removeEventListener("pointerleave", recenter);
+      window.removeEventListener("pointercancel", onPointerCancel);
       window.removeEventListener("resize", onResize);
       geo.dispose();
       material.dispose();
@@ -380,5 +570,11 @@ export default function IcosahedronCanvas() {
     };
   }, []);
 
-  return <div ref={mountRef} className="absolute inset-0" aria-hidden="true" />;
+  return (
+    <div
+      ref={mountRef}
+      className="absolute inset-0 touch-pan-y"
+      aria-hidden="true"
+    />
+  );
 }
