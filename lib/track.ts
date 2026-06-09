@@ -4,6 +4,29 @@
 // unload), falling back to fetch+keepalive.
 
 const VID_KEY = "sb_vid";
+const OPTOUT_KEY = "sb_optout";
+
+// Owner opt-out: when set, this browser is excluded from ALL analytics
+// (first-party events, Clarity, and Vercel). Toggle it on the /optout page.
+// Persists in localStorage until site data is cleared. Set once per browser.
+export function isOptedOut(): boolean {
+  if (typeof window === "undefined") return false;
+  try {
+    return localStorage.getItem(OPTOUT_KEY) === "1";
+  } catch {
+    return false;
+  }
+}
+
+export function setOptedOut(value: boolean): void {
+  if (typeof window === "undefined") return;
+  try {
+    if (value) localStorage.setItem(OPTOUT_KEY, "1");
+    else localStorage.removeItem(OPTOUT_KEY);
+  } catch {
+    /* storage blocked */
+  }
+}
 
 export function getVisitorId(): string {
   if (typeof window === "undefined") return "";
@@ -23,6 +46,7 @@ export function getVisitorId(): string {
 
 export function trackEvent(event: string): void {
   if (typeof window === "undefined") return;
+  if (isOptedOut()) return; // owner-excluded browser
   const payload = JSON.stringify({
     event,
     vid: getVisitorId(),

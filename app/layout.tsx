@@ -1,7 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Inter, Fragment_Mono } from "next/font/google";
 import "./globals.css";
-import { Analytics } from "@vercel/analytics/next";
+import VercelAnalytics from "@/components/VercelAnalytics";
 import Clarity from "@/components/Clarity";
 import Tracker from "@/components/Tracker";
 import TopNav from "@/components/TopNav";
@@ -69,7 +69,7 @@ export default function RootLayout({
       <body className="antialiased">
         <TopNav />
         {children}
-        <Analytics />
+        <VercelAnalytics />
         <Clarity />
         <Tracker />
       </body>
