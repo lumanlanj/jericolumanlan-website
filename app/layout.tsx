@@ -1,6 +1,8 @@
 import type { Metadata, Viewport } from "next";
 import { Inter, Fragment_Mono } from "next/font/google";
 import "./globals.css";
+import { Analytics } from "@vercel/analytics/next";
+import Clarity from "@/components/Clarity";
 import TopNav from "@/components/TopNav";
 
 const inter = Inter({
@@ -66,6 +68,8 @@ export default function RootLayout({
       <body className="antialiased">
         <TopNav />
         {children}
+        <Analytics />
+        <Clarity />
       </body>
     </html>
   );
