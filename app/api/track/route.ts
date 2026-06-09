@@ -5,6 +5,8 @@ import {
   ALLOWED_EVENTS,
   RECENT_MAX,
   VISIT_TTL_SECONDS,
+  isOwnerIp,
+  clientIp,
 } from "@/lib/analytics-redis";
 
 // First-party event ingest. The site POSTs anonymous events here:
@@ -15,6 +17,12 @@ import {
 export async function POST(req: NextRequest) {
   // No store configured yet → accept and drop, so the site works pre-Upstash.
   if (!redis) return new Response(null, { status: 204 });
+
+  // Owner-IP exclusion: silently drop events from the site owner's networks so
+  // self-visits (any browser/device/incognito on these IPs) never reach Redis.
+  if (isOwnerIp(clientIp(req.headers))) {
+    return new Response(null, { status: 204 });
+  }
 
   let body: { event?: string; vid?: string; path?: string };
   try {

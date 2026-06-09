@@ -36,3 +36,41 @@ export const ALLOWED_EVENTS = new Set([
 
 export const RECENT_MAX = 50;
 export const VISIT_TTL_SECONDS = 60 * 60 * 24 * 365; // 1 year
+
+// Owner IPs/prefixes excluded from analytics server-side (comma-separated
+// OWNER_IPS env var). Unlike the per-browser /optout localStorage flag, this
+// drops events from every browser, device, and incognito session on these
+// networks — no per-device setup. Entries may be a full IPv4/IPv6 address OR an
+// IPv6 /64 network prefix (first four hextets, e.g. "2600:4040:5c78:d900"),
+// which matches all devices on that network even as the rotating /128 suffix
+// changes. IPs can drift (mobile/travel/ISP), so this complements /optout
+// rather than replacing it.
+export const OWNER_IPS = new Set(
+  (process.env.OWNER_IPS ?? "")
+    .split(",")
+    .map((ip) => ip.trim())
+    .filter(Boolean),
+);
+
+// Best-effort client IP from the edge headers Vercel sets. x-forwarded-for is a
+// comma-separated chain; the first entry is the original client.
+export function clientIp(headers: Headers): string {
+  const xff = headers.get("x-forwarded-for");
+  if (xff) return xff.split(",")[0].trim();
+  return headers.get("x-real-ip") ?? "";
+}
+
+// True if the IP is the owner's: exact match, or its IPv6 /64 prefix (first
+// four hextets) matches a prefix entry. Compressed "::" forms are skipped for
+// the prefix check — Vercel delivers fully-expanded addresses here.
+export function isOwnerIp(ip: string): boolean {
+  if (!ip || OWNER_IPS.size === 0) return false;
+  if (OWNER_IPS.has(ip)) return true;
+  if (ip.includes(":")) {
+    const groups = ip.split(":");
+    if (groups.length >= 4 && !groups.slice(0, 4).some((g) => g === "")) {
+      return OWNER_IPS.has(groups.slice(0, 4).join(":"));
+    }
+  }
+  return false;
+}
