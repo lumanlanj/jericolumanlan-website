@@ -3,6 +3,7 @@ import { Inter, Fragment_Mono } from "next/font/google";
 import "./globals.css";
 import { Analytics } from "@vercel/analytics/next";
 import Clarity from "@/components/Clarity";
+import Tracker from "@/components/Tracker";
 import TopNav from "@/components/TopNav";
 
 const inter = Inter({
@@ -70,6 +71,7 @@ export default function RootLayout({
         {children}
         <Analytics />
         <Clarity />
+        <Tracker />
       </body>
     </html>
   );

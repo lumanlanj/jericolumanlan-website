@@ -2,14 +2,17 @@
 
 import Link from "next/link";
 import { track } from "@vercel/analytics";
+import { trackEvent } from "@/lib/track";
 
-// Fire the resume-download conversion to both analytics sinks the site uses:
-// Vercel Web Analytics (custom event) and Microsoft Clarity (custom event).
+// Fire the resume-download conversion to all three analytics sinks: Vercel Web
+// Analytics, Microsoft Clarity, and our own first-party endpoint (the one the
+// SiteBar menu bar reads for an exact, real-time download count).
 function trackResumeDownload() {
   track("resume_download");
   (
     window as typeof window & { clarity?: (...args: unknown[]) => void }
   ).clarity?.("event", "resume_download");
+  trackEvent("resume_download");
 }
 
 const NAV = [
