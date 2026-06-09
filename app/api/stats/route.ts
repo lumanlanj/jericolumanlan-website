@@ -23,10 +23,11 @@ export async function GET(req: NextRequest) {
       resumeDownloads: 0,
       scrollBottoms: 0,
       recent: [],
+      sources: [],
     });
   }
 
-  const [pageviews, returning, resume, scroll, unique, recentRaw] =
+  const [pageviews, returning, resume, scroll, unique, recentRaw, sourcesRaw] =
     await Promise.all([
       redis.get<number>(KEYS.count("pageview")),
       redis.get<number>(KEYS.returning),
@@ -34,7 +35,14 @@ export async function GET(req: NextRequest) {
       redis.get<number>(KEYS.count("scroll_bottom")),
       redis.pfcount(KEYS.uniqueHLL),
       redis.lrange(KEYS.recent, 0, RECENT_MAX - 1),
+      redis.hgetall<Record<string, string | number>>(KEYS.sources),
     ]);
+
+  // First-visit counts per traffic source, biggest first.
+  const sources = Object.entries(sourcesRaw ?? {})
+    .map(([source, count]) => ({ source, count: Number(count) || 0 }))
+    .filter((s) => s.count > 0)
+    .sort((a, b) => b.count - a.count);
 
   // Upstash auto-deserializes JSON, so entries may already be objects.
   const recent: RecentEvent[] = (recentRaw ?? [])
@@ -59,6 +67,7 @@ export async function GET(req: NextRequest) {
       resumeDownloads: resume ?? 0,
       scrollBottoms: scroll ?? 0,
       recent,
+      sources,
     },
     { headers: { "Cache-Control": "no-store" } },
   );

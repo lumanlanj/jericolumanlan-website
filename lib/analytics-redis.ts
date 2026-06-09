@@ -23,7 +23,15 @@ export const KEYS = {
   visits: (vid: string) => `v:${vid}`,
   returning: "c:returning",
   recent: "recent:events",
+  sources: "h:sources", // hash: source label → first-visit count
 } as const;
+
+// Normalize a client-supplied source label to a safe, bounded token before it
+// becomes a Redis hash field. Anything empty/garbage collapses to "direct".
+export function cleanSource(s: string | undefined): string {
+  const v = (s ?? "").toLowerCase().replace(/[^a-z0-9.\-]/g, "").slice(0, 32);
+  return v || "direct";
+}
 
 // Events the tracker is allowed to record. Anything else is dropped so a bad
 // or spoofed payload can't pollute the counters. `resume_link:*` (tracked

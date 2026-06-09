@@ -7,6 +7,7 @@ import {
   VISIT_TTL_SECONDS,
   isOwnerIp,
   clientIp,
+  cleanSource,
 } from "@/lib/analytics-redis";
 
 // First-party event ingest. The site POSTs anonymous events here:
@@ -24,7 +25,7 @@ export async function POST(req: NextRequest) {
     return new Response(null, { status: 204 });
   }
 
-  let body: { event?: string; vid?: string; path?: string };
+  let body: { event?: string; vid?: string; path?: string; source?: string };
   try {
     body = await req.json();
   } catch {
@@ -57,11 +58,16 @@ export async function POST(req: NextRequest) {
     }
     const results = await p.exec();
 
-    // If this pageview's visit count just became 2, it's a newly-returning
-    // visitor — bump the returning counter exactly once.
+    // Returning + source attribution, keyed off this visitor's visit count.
     if (event === "pageview" && vid) {
       const visitCount = Number(results[results.length - 2]); // incr v:<vid>
-      if (visitCount === 2) await redis.incr(KEYS.returning);
+      if (visitCount === 2) {
+        // Just became a returning visitor — bump the counter exactly once.
+        await redis.incr(KEYS.returning);
+      } else if (visitCount === 1) {
+        // First-ever visit — attribute it to its source (one count per visitor).
+        await redis.hincrby(KEYS.sources, cleanSource(body.source), 1);
+      }
     }
   } catch {
     // Never fail the client on a tracking hiccup.
