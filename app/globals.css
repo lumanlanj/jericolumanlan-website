@@ -123,7 +123,7 @@ body {
 .work-item--featured .carl-demo,
 .work-item--featured .mahta-demo { min-width: 0; }
 @media (min-width: 900px) {
-  .work-item--featured { grid-template-columns: minmax(0,1fr) 300px; align-items: center; gap: 88px; }
+  .work-item--featured { grid-template-columns: minmax(0,1fr) 300px; align-items: start; gap: 88px; }
 }
 .work-copy { display: flex; flex-direction: column; gap: 8px; }
 .work-item--featured .work-desc, .work-item--mahta .work-desc { max-width: 46ch; }
@@ -288,7 +288,9 @@ figcaption.flag::before { content: ""; width: 4px; height: 4px; border-radius: 5
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
   .hero-scroll-cue { animation: none; }
-  .orb-hint { animation: none; }
+  /* The hint is invisible by default and only revealed by its animation, so
+     under reduced-motion show it statically instead of leaving it hidden. */
+  .orb-hint { animation: none; opacity: 1; }
   .typing span { animation: none; }
   .mq-dot { animation: none; }
   .mq-work, .mq-report, .rep-list li, .storyboard figure, .bp-flag, .mq-prog i, .bp-top { transition: none; }

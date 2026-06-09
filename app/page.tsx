@@ -63,7 +63,7 @@ export default async function Home() {
       </Section>
 
       {/* WORK */}
-      <Section id="work" eyebrow="Selected work">
+      <Section id="work" eyebrow="AI experiments">
         <div className="divide-y divide-(--color-border)">
           {projects.map((p) => {
             const href = p.links?.[0]?.url;
@@ -93,6 +93,22 @@ export default async function Home() {
                       <p className="work-desc text-[15px] md:text-[16px] leading-relaxed text-(--color-bio)">
                         {p.description}
                       </p>
+                      {p.highlights && p.highlights.length > 0 && (
+                        <ul className="work-desc mt-3 space-y-2">
+                          {p.highlights.map((h) => (
+                            <li
+                              key={h}
+                              className="flex gap-2.5 text-[14px] md:text-[15px] leading-relaxed text-(--color-bio)"
+                            >
+                              <span
+                                aria-hidden="true"
+                                className="mt-[0.45em] h-1.5 w-1.5 shrink-0 rounded-full bg-(--color-accent)"
+                              />
+                              <span>{h}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      )}
                     </div>
                     {Demo()}
                   </div>

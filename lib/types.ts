@@ -32,6 +32,7 @@ export type Project = {
   slug: string;
   title: string;
   description: string;
+  highlights?: string[];
   status: "live" | "wip" | "archived";
   links?: { label: string; url: string }[];
   order?: number;

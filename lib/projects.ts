@@ -30,6 +30,9 @@ export async function readProjects(): Promise<Project[]> {
       slug: file.replace(/\.md$/, ""),
       title: String(data.title),
       description: String(data.description),
+      highlights: Array.isArray(data.highlights)
+        ? data.highlights.map(String)
+        : undefined,
       status: data.status as Project["status"],
       links: Array.isArray(data.links) ? data.links : undefined,
       order: typeof data.order === "number" ? data.order : undefined,

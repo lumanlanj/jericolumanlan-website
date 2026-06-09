@@ -1,6 +1,12 @@
 ---
 title: Carl
 description: "A personal assistant that lives in iMessage — 85 MCP tools wired to Gmail, Calendar, GitHub, Drive, and Sheets. Text it a screenshot and it gets the job done."
+highlights:
+  - "Researches and summarizes the AI and climate-tech industries"
+  - "Creates calendar events from a screenshot you text him"
+  - "Builds mini-apps from a plain conversation"
+  - "Monitors and triages your Gmail"
+  - "…and plenty more, day to day"
 status: live
 order: 1
 date: 2026-05-26
