@@ -414,7 +414,8 @@ figcaption.flag::before { content: ""; width: 4px; height: 4px; border-radius: 5
 .orb-callout.is-in .oc-desc { animation-delay: .06s; }
 @keyframes oc-rise { from { transform: translateY(9px); } to { transform: none; } }
 @media (max-width: 767px), (max-height: 600px) {
-  .orb-callout { top: 92px; }
+  /* Keep the callout pinned to the orb, which now sits below the nav. */
+  .orb-callout { top: calc(env(safe-area-inset-top, 0px) + 106px); }
   .orb-callout .oc-name { font-size: 18px; }
   .orb-callout .oc-desc { display: none; }
 }
@@ -654,7 +655,8 @@ footer.site-footer { border-top: 1px solid var(--color-border); padding: 64px 0;
    below the ≥768px desktop styles) AND any short/landscape viewport (≤600px tall). */
 @media (max-width: 767px), (max-height: 600px) {
   .hero { height: auto; min-height: 100svh; display: flex; flex-direction: column; }
-  #orb { position: relative; inset: auto; flex: 1 1 auto; min-height: 42svh; }
+  /* Push the orb below the floating nav pill (safe-area inset + pill height). */
+  #orb { position: relative; inset: auto; flex: 1 1 auto; min-height: 42svh; margin-top: calc(env(safe-area-inset-top, 0px) + 76px); }
   .hero-scrim { display: none; }
   .hero-intro { position: relative; bottom: auto; flex: 0 0 auto; }
   .hero-intro .wrap { padding-top: 28px; padding-bottom: 40px; }
