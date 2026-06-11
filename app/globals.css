@@ -646,3 +646,15 @@ footer.site-footer { border-top: 1px solid var(--color-border); padding: 64px 0;
   .hl-time { display: none; }
   .hl-title { font-size: 13px; }
 }
+
+/* ---------- Mobile hero: orb contained on top, content flows below ----------
+   On phones the bottom-pinned intro is taller than 100svh and overlaps the nav
+   and orb callout. Re-flow the hero into a column: orb up top, copy beneath. */
+@media (max-width: 700px) {
+  .hero { height: auto; min-height: 100svh; display: flex; flex-direction: column; }
+  #orb { position: relative; inset: auto; flex: 1 0 auto; min-height: 44svh; }
+  .hero-scrim { display: none; }
+  .hero-intro { position: relative; bottom: auto; }
+  .hero-intro .wrap { padding-top: 30px; padding-bottom: 40px; }
+  .hero-scroll-cue { display: none; }
+}

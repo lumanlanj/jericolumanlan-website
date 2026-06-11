@@ -629,11 +629,8 @@ export default function IcosahedronCanvas({
     };
   }, []);
 
-  return (
-    <div
-      ref={mountRef}
-      className="absolute inset-0 touch-pan-y cursor-grab"
-      aria-hidden="true"
-    />
-  );
+  // Positioning + touch/cursor live in the `#orb` rule in globals.css so the
+  // mobile layout can re-flow it (absolute full-bleed on desktop → contained
+  // flex item on phones).
+  return <div id="orb" ref={mountRef} aria-hidden="true" />;
 }
