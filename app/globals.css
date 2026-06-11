@@ -413,7 +413,7 @@ figcaption.flag::before { content: ""; width: 4px; height: 4px; border-radius: 5
 .orb-callout.is-in .oc-name, .orb-callout.is-in .oc-desc { animation: oc-rise .55s cubic-bezier(0.22,1,0.36,1); }
 .orb-callout.is-in .oc-desc { animation-delay: .06s; }
 @keyframes oc-rise { from { transform: translateY(9px); } to { transform: none; } }
-@media (max-width: 700px) {
+@media (max-width: 767px), (max-height: 600px) {
   .orb-callout { top: 92px; }
   .orb-callout .oc-name { font-size: 18px; }
   .orb-callout .oc-desc { display: none; }
@@ -647,14 +647,16 @@ footer.site-footer { border-top: 1px solid var(--color-border); padding: 64px 0;
   .hl-title { font-size: 13px; }
 }
 
-/* ---------- Mobile hero: orb contained on top, content flows below ----------
-   On phones the bottom-pinned intro is taller than 100svh and overlaps the nav
-   and orb callout. Re-flow the hero into a column: orb up top, copy beneath. */
-@media (max-width: 700px) {
+/* ---------- Mobile / short-viewport hero: orb contained on top, content below ----------
+   The bottom-pinned absolute intro is taller than 100svh on phones (and in
+   landscape), so it overlaps the nav + orb callout. Re-flow into a column so the
+   hero can grow and scroll. Triggers for EVERY phone width (≤767px, the row
+   below the ≥768px desktop styles) AND any short/landscape viewport (≤600px tall). */
+@media (max-width: 767px), (max-height: 600px) {
   .hero { height: auto; min-height: 100svh; display: flex; flex-direction: column; }
-  #orb { position: relative; inset: auto; flex: 1 0 auto; min-height: 44svh; }
+  #orb { position: relative; inset: auto; flex: 1 1 auto; min-height: 42svh; }
   .hero-scrim { display: none; }
-  .hero-intro { position: relative; bottom: auto; }
-  .hero-intro .wrap { padding-top: 30px; padding-bottom: 40px; }
+  .hero-intro { position: relative; bottom: auto; flex: 0 0 auto; }
+  .hero-intro .wrap { padding-top: 28px; padding-bottom: 40px; }
   .hero-scroll-cue { display: none; }
 }
