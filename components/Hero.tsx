@@ -80,7 +80,7 @@ export default function Hero({ latest = [] }: { latest?: LatestItem[] }) {
             </div>
             <div className="hm-cell">
               <dt>Previously</dt>
-              <dd>Staples · Pitney Bowes</dd>
+              <dd>Staples · Spotify · Pitney Bowes</dd>
             </div>
             <div className="hm-cell">
               <dt>Based</dt>
