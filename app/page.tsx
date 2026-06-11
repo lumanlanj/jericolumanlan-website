@@ -29,6 +29,7 @@ export default async function Home() {
       {/* PROOF — career impact by the numbers */}
       <section className="proof" aria-label="Career impact by the numbers">
         <div className="container">
+          <p className="proof-frame reveal"><span className="rule" aria-hidden="true"></span><span>Impact <span className="accent">&mdash; across climate tech &amp; e-commerce</span></span></p>
           <div className="proof-grid">
             <div className="stat reveal">
               <div className="stat-fig">

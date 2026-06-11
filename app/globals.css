@@ -484,7 +484,15 @@ section.block { border-top: 1px solid var(--color-border); padding: 80px 0; scro
 .work-highlights li::before { content: ""; position: absolute; left: 0; top: 0.55em; width: 5px; height: 5px; background: var(--color-hair); }
 
 /* ---------- Proof band ---------- */
-.proof { border-top: 1px solid var(--color-border); }
+.proof { border-top: 1px solid var(--color-border); padding-top: 40px; }
+.proof-frame {
+  display: flex; align-items: center; gap: 14px;
+  font-family: var(--font-mono); font-size: 10.5px; font-weight: 500;
+  text-transform: uppercase; letter-spacing: 0.18em; color: var(--color-muted);
+  margin: 0 0 30px;
+}
+.proof-frame .rule { flex: 0 0 auto; width: 34px; height: 1px; background: var(--color-hair); }
+.proof-frame .accent { color: var(--color-ink); }
 .proof-grid { display: grid; grid-template-columns: 1fr; }
 .stat { padding: 32px 0; border-top: 1px solid var(--color-border); }
 .stat:first-child { border-top: 0; }
