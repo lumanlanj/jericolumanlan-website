@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import IcosahedronCanvas from "@/components/IcosahedronCanvas";
+import HeroLatest, { type LatestItem } from "@/components/HeroLatest";
 
 /**
  * Full-viewport landing hero: the particle orb morphs through the three domains
@@ -15,7 +16,7 @@ const DOMAINS = [
   { fig: "03", name: "AI", desc: "Agents & ML products" },
 ] as const;
 
-export default function Hero() {
+export default function Hero({ latest = [] }: { latest?: LatestItem[] }) {
   const [domain, setDomain] = useState(0);
   const hintRef = useRef<HTMLDivElement>(null);
   const d = DOMAINS[domain];
@@ -70,6 +71,8 @@ export default function Hero() {
             tech and e-commerce &mdash; shipping work that has influenced{" "}
             <span className="lede-ink">~$1B in annual revenue</span>.
           </p>
+          {/* Recency strip — shows posts/ships from the last 7 days, else nothing. */}
+          <HeroLatest items={latest} />
           <dl className="hero-meta">
             <div className="hm-cell">
               <dt>Now</dt>

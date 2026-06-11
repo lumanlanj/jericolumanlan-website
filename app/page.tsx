@@ -13,10 +13,18 @@ export default async function Home() {
   const [medium, substack] = await Promise.all([fetchMedium(), fetchSubstack()]);
   const recentWriting = mergeWriting(medium, substack).slice(0, 5);
 
+  // Hero "Latest" strip candidates — the client filters these to the last 7 days.
+  const latest = recentWriting.map((w) => ({
+    type: "Blog post",
+    title: w.title,
+    url: w.url,
+    date: w.timestamp.slice(0, 10),
+  }));
+
   return (
     <>
       <SectionIndex />
-      <Hero />
+      <Hero latest={latest} />
 
       {/* PROOF — career impact by the numbers */}
       <section className="proof" aria-label="Career impact by the numbers">
