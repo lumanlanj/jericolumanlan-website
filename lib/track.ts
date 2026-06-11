@@ -1,3 +1,5 @@
+import { sanitizeSourceLabel } from "./text";
+
 // First-party, anonymous client tracking. A random per-browser id (no identity)
 // is stored in localStorage so the backend can tell unique vs returning
 // visitors. Events are sent fire-and-forget via sendBeacon (survives page
@@ -51,9 +53,7 @@ export function getVisitorId(): string {
 function detectSource(): string {
   try {
     const utm = new URLSearchParams(window.location.search).get("utm_source");
-    if (utm) {
-      return utm.toLowerCase().replace(/[^a-z0-9.\-]/g, "").slice(0, 32) || "direct";
-    }
+    if (utm) return sanitizeSourceLabel(utm);
     const ref = document.referrer;
     if (!ref) return "direct";
     const host = new URL(ref).hostname.replace(/^www\./, "").toLowerCase();

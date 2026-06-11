@@ -1,40 +1,25 @@
-import { promises as fs } from "fs";
-import path from "path";
-import matter from "gray-matter";
 import type { Project } from "./types";
-
-const PROJECTS_DIR = path.join(process.cwd(), "content", "projects");
-
-function normalizeDate(v: unknown): string {
-  if (v instanceof Date) return v.toISOString().slice(0, 10);
-  return String(v);
-}
+import { readMarkdownDir } from "./markdown";
+import { normalizeDate } from "./text";
 
 export async function readProjects(): Promise<Project[]> {
-  let files: string[];
-  try {
-    files = await fs.readdir(PROJECTS_DIR);
-  } catch {
-    return [];
-  }
+  const files = await readMarkdownDir("content", "projects");
 
   const projects: Project[] = [];
-  for (const file of files) {
-    if (!file.endsWith(".md")) continue;
-    const raw = await fs.readFile(path.join(PROJECTS_DIR, file), "utf8");
-    const { data, content } = matter(raw);
-
+  for (const { slug, data, content } of files) {
     if (!data.title || !data.description || !data.status || !data.date) continue;
 
     projects.push({
-      slug: file.replace(/\.md$/, ""),
+      slug,
       title: String(data.title),
       description: String(data.description),
       highlights: Array.isArray(data.highlights)
         ? data.highlights.map(String)
         : undefined,
       status: data.status as Project["status"],
-      links: Array.isArray(data.links) ? data.links : undefined,
+      links: Array.isArray(data.links)
+        ? (data.links as Project["links"])
+        : undefined,
       order: typeof data.order === "number" ? data.order : undefined,
       date: normalizeDate(data.date),
       body: content,

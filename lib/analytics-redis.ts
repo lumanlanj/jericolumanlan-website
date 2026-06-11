@@ -1,4 +1,5 @@
 import { Redis } from "@upstash/redis";
+import { sanitizeSourceLabel } from "./text";
 
 // Single Redis client for first-party event tracking, or null when no store is
 // configured — so the site builds and runs fine before Upstash is provisioned.
@@ -28,10 +29,7 @@ export const KEYS = {
 
 // Normalize a client-supplied source label to a safe, bounded token before it
 // becomes a Redis hash field. Anything empty/garbage collapses to "direct".
-export function cleanSource(s: string | undefined): string {
-  const v = (s ?? "").toLowerCase().replace(/[^a-z0-9.\-]/g, "").slice(0, 32);
-  return v || "direct";
-}
+export const cleanSource = sanitizeSourceLabel;
 
 // Events the tracker is allowed to record. Anything else is dropped so a bad
 // or spoofed payload can't pollute the counters. `resume_link:*` (tracked

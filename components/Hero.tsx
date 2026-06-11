@@ -1,23 +1,38 @@
+"use client";
+
+import { useEffect, useRef, useState } from "react";
 import IcosahedronCanvas from "@/components/IcosahedronCanvas";
 
 /**
- * Full-viewport landing hero: the 3D icosahedron floats as the centerpiece with
- * a bold, yurikim-style introductory statement anchored bottom-left. A CSS
- * radial gradient is the WebGL fallback (shown if the canvas renders nothing).
+ * Full-viewport landing hero: the particle orb morphs through the three domains
+ * Jerico works across (Climate → Commerce → AI), with a technical-drawing
+ * callout that tracks the active shape. Intro copy + a bordered stat block are
+ * pinned bottom-left. A CSS radial gradient is the WebGL fallback.
  */
-export default function Hero() {
-  return (
-    <section
-      className="relative h-svh min-h-[600px] w-full overflow-hidden text-white"
-      style={{
-        background:
-          "radial-gradient(80% 70% at 50% 42%, #0c0814 0%, #050507 55%, #020203 100%)",
-      }}
-    >
-      <IcosahedronCanvas />
+const DOMAINS = [
+  { fig: "01", name: "Climate", desc: "Environmental markets & compliance" },
+  { fig: "02", name: "Commerce", desc: "Marketplaces & subscriptions" },
+  { fig: "03", name: "AI", desc: "Agents & ML products" },
+] as const;
 
-      {/* Orb interaction hint — slides down from under the nav, holds, then leaves once on load. */}
-      <div className="orb-hint" aria-hidden="true">
+export default function Hero() {
+  const [domain, setDomain] = useState(0);
+  const hintRef = useRef<HTMLDivElement>(null);
+  const d = DOMAINS[domain];
+
+  // One-shot interaction hint: slides in ~1.2s after load, then leaves.
+  useEffect(() => {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const t = window.setTimeout(() => hintRef.current?.classList.add("is-playing"), 1200);
+    return () => clearTimeout(t);
+  }, []);
+
+  return (
+    <section className="hero">
+      <IcosahedronCanvas onDomainChange={setDomain} />
+
+      {/* Orb interaction hint — slides down from under the nav, holds, then leaves once. */}
+      <div className="orb-hint" ref={hintRef} aria-hidden="true">
         <span className="orb-hint-hand">
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
             <path d="M18 11V6a2 2 0 0 0-2-2 2 2 0 0 0-2 2 2 2 0 0 0-2-2 2 2 0 0 0-2 2v0a2 2 0 0 0-2-2 2 2 0 0 0-2 2v8" />
@@ -30,46 +45,50 @@ export default function Hero() {
       </div>
 
       {/* Legibility scrim behind the intro. */}
-      <div
-        className="pointer-events-none absolute inset-0"
-        style={{
-          background:
-            "linear-gradient(to top, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0.12) 32%, transparent 58%)",
-        }}
-      />
+      <div className="hero-scrim" />
+
+      {/* Orb domain callout — technical-drawing annotation, tracks the orb. */}
+      <figure className="orb-callout is-in" aria-hidden="true">
+        <span className="oc-rule" />
+        <span className="oc-fig">FIG · {d.fig} / 03</span>
+        {/* Keyed by domain so the rise animation replays on every morph. */}
+        <span className="oc-name" key={`n${domain}`}>{d.name}</span>
+        <span className="oc-desc" key={`d${domain}`}>{d.desc}</span>
+      </figure>
 
       {/* Intro statement, bottom-left. */}
-      <div className="absolute bottom-0 left-0 right-0">
-        <div className="mx-auto max-w-[1100px] px-6 pb-16 md:pb-20">
-          <p className="font-mono text-[12px] uppercase tracking-[0.18em] text-white/55 mb-4">
-            Product Manager
-          </p>
-          <h1 className="text-[34px] leading-[1.08] md:text-[58px] md:leading-[1.04] font-semibold tracking-tight max-w-[16ch]">
-            Hey, I&rsquo;m Jerico.
-          </h1>
-          <p className="mt-4 md:mt-5 text-[16px] md:text-[20px] leading-relaxed text-white/70 max-w-[46ch]">
-            I build products across sustainability, ecommerce, and customer
-            experience.
-          </p>
-          <div className="mt-6 space-y-2 font-mono text-[12px] uppercase tracking-[0.12em] text-white/45">
-            <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
-              <span>Now @ Xpansiv, Managed Solutions, Clean Transportation</span>
-            </div>
-            <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
-              <span>Previously Spotify, Staples</span>
-              <span className="text-white/25">/</span>
-              <span>Based in Boston</span>
-            </div>
+      <div className="hero-intro">
+        <div className="wrap">
+          {/* Identity lockup: name as a confident display line, role in mono beneath. */}
+          <div className="hero-name">
+            <p className="hn-name">Jerico Lumanlan</p>
+            <p className="hn-role">Product Manager</p>
           </div>
+          <h1>Building products that hold up under real constraints.</h1>
+          <p className="lede">
+            I build AI-enabled, revenue-generating, and compliance-driven products across climate
+            tech and e-commerce &mdash; shipping work that has influenced{" "}
+            <span className="lede-ink">~$1B in annual revenue</span>.
+          </p>
+          <dl className="hero-meta">
+            <div className="hm-cell">
+              <dt>Now</dt>
+              <dd>Xpansiv — PM, Managed Solutions (Clean Transportation)</dd>
+            </div>
+            <div className="hm-cell">
+              <dt>Previously</dt>
+              <dd>Staples · Pitney Bowes</dd>
+            </div>
+            <div className="hm-cell">
+              <dt>Based</dt>
+              <dd>Boston, Massachusetts</dd>
+            </div>
+          </dl>
         </div>
       </div>
 
       {/* Scroll cue. */}
-      <a
-        href="#about"
-        aria-label="Scroll to about"
-        className="hero-scroll-cue absolute bottom-6 left-1/2 -translate-x-1/2 text-white/45 hover:text-white/90 transition-colors"
-      >
+      <a href="#about" aria-label="Scroll to about" className="hero-scroll-cue">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden="true">
           <path d="M12 5v14M6 13l6 6 6-6" strokeLinecap="round" strokeLinejoin="round" />
         </svg>

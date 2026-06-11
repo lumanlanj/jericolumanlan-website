@@ -1,21 +1,23 @@
 import type { Metadata, Viewport } from "next";
-import { Inter, Fragment_Mono } from "next/font/google";
+import { Geist, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import VercelAnalytics from "@/components/VercelAnalytics";
 import Clarity from "@/components/Clarity";
 import Tracker from "@/components/Tracker";
 import TopNav from "@/components/TopNav";
 
-const inter = Inter({
+// Swiss / International Typographic type system: Geist (neutral grotesk) for
+// reading, JetBrains Mono as the structural labeling layer (eyebrows, section
+// numbers, status pills, dates, URLs).
+const geist = Geist({
   subsets: ["latin"],
-  variable: "--font-inter",
+  variable: "--font-geist",
   display: "swap",
 });
 
-const fragmentMono = Fragment_Mono({
-  weight: "400",
+const jetbrainsMono = JetBrains_Mono({
   subsets: ["latin"],
-  variable: "--font-mono-fragment",
+  variable: "--font-jetbrains",
   display: "swap",
 });
 
@@ -65,7 +67,20 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" className={`${inter.variable} ${fragmentMono.variable}`}>
+    <html
+      lang="en"
+      className={`${geist.variable} ${jetbrainsMono.variable}`}
+      suppressHydrationWarning
+    >
+      <head>
+        {/* Progressive-enhancement flag: arms scroll-reveal hiding only when JS
+            is present, so no-JS visitors still see all content. */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: "document.documentElement.classList.add('js')",
+          }}
+        />
+      </head>
       <body className="antialiased">
         <TopNav />
         {children}

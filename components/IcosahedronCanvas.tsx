@@ -17,8 +17,17 @@ import * as THREE from "three";
  * prefers-reduced-motion → one static frame, no loop, no spin. Pauses when
  * hidden / offscreen.
  */
-export default function IcosahedronCanvas() {
+export default function IcosahedronCanvas({
+  onDomainChange,
+}: {
+  /** Fired with the active shape index (0=Climate, 1=Commerce, 2=AI) on mount
+   *  and every morph, so the hero callout can track the orb. */
+  onDomainChange?: (index: number) => void;
+}) {
   const mountRef = useRef<HTMLDivElement>(null);
+  // Keep the latest callback without re-running the (expensive) WebGL setup.
+  const domainCb = useRef(onDomainChange);
+  domainCb.current = onDomainChange;
 
   useEffect(() => {
     const mount = mountRef.current;
@@ -144,13 +153,43 @@ export default function IcosahedronCanvas() {
       return { pos, nrm };
     };
 
+    // A tesseract (4D hypercube), surface-sampled to match the density/glow of
+    // the other shapes: outer cube + inner cube + the walls connecting them.
+    const sampleTesseract = (count: number, rng: () => number) => {
+      const o = 0.78,
+        ii = 0.42;
+      const cube = (s: number) => [
+        [-s, -s, -s], [s, -s, -s], [s, s, -s], [-s, s, -s],
+        [-s, -s, s], [s, -s, s], [s, s, s], [-s, s, s],
+      ];
+      const verts = [...cube(o), ...cube(ii)];
+      const faces = [[0, 3, 2, 1], [4, 5, 6, 7], [0, 4, 7, 3], [1, 2, 6, 5], [0, 1, 5, 4], [3, 7, 6, 2]];
+      const cubeEdges = [[0, 1], [1, 2], [2, 3], [3, 0], [4, 5], [5, 6], [6, 7], [7, 4], [0, 4], [1, 5], [2, 6], [3, 7]];
+      const quads: number[][] = [];
+      faces.forEach((f) => quads.push(f)); // outer cube
+      faces.forEach((f) => quads.push(f.map((i) => i + 8))); // inner cube
+      cubeEdges.forEach((e) => quads.push([e[0], e[1], e[1] + 8, e[0] + 8])); // connecting walls
+      const pts: number[] = [];
+      quads.forEach((q) => {
+        const A = verts[q[0]], B = verts[q[1]], C = verts[q[2]], D = verts[q[3]];
+        pts.push(...A, ...B, ...C, ...A, ...C, ...D);
+      });
+      const g = new THREE.BufferGeometry();
+      g.setAttribute("position", new THREE.BufferAttribute(new Float32Array(pts), 3));
+      g.computeVertexNormals();
+      return samplePoly(g, count, rng);
+    };
+
     const rng = makeRng(0x9e3779b9);
+    // Each shape maps to a domain Jerico works across:
+    // 0 · Climate (sphere) → 1 · Commerce (dodecahedron) → 2 · AI (tesseract).
     const SHAPES = [
-      samplePoly(new THREE.IcosahedronGeometry(1.12, 0), COUNT, rng),
-      samplePoly(new THREE.DodecahedronGeometry(1.18, 0), COUNT, rng),
       sampleSphere(COUNT, 1.06),
+      samplePoly(new THREE.DodecahedronGeometry(1.18, 0), COUNT, rng),
+      sampleTesseract(COUNT, rng),
     ];
     let shapeIndex = 0;
+    domainCb.current?.(0);
 
     // A = current shape, B = morph target; u_morph blends A→B in the shader.
     const posA = SHAPES[0].pos.slice();
@@ -359,8 +398,20 @@ export default function IcosahedronCanvas() {
     let morphT = 0;
     const smoothstep = (x: number) => x * x * (3 - 2 * x);
 
+    // Auto-cycle the orb through its three domains every 7s (idle, no input).
+    let autoTimer: ReturnType<typeof setTimeout> | null = null;
+    const AUTO_INTERVAL = 7000;
+    const scheduleAuto = () => {
+      if (reduceMotion) return;
+      if (autoTimer) clearTimeout(autoTimer);
+      autoTimer = setTimeout(() => cycleShape(), AUTO_INTERVAL);
+    };
+
     const cycleShape = () => {
-      if (morphing) return;
+      if (morphing) {
+        scheduleAuto();
+        return;
+      }
       const next = (shapeIndex + 1) % SHAPES.length;
       posB.set(SHAPES[next].pos);
       nrmB.set(SHAPES[next].nrm);
@@ -369,6 +420,8 @@ export default function IcosahedronCanvas() {
       morphing = true;
       morphT = 0;
       shapeIndex = next;
+      domainCb.current?.(next);
+      scheduleAuto();
       if (!running) start(); // wake the loop if it was idle
     };
 
@@ -528,11 +581,13 @@ export default function IcosahedronCanvas() {
       running = true;
       clock.start();
       loop();
+      scheduleAuto();
     }
     const stop = () => {
       if (!running) return;
       running = false;
       cancelAnimationFrame(raf);
+      if (autoTimer) clearTimeout(autoTimer);
     };
 
     if (reduceMotion) {
@@ -541,6 +596,7 @@ export default function IcosahedronCanvas() {
       renderFrame();
     } else {
       loop();
+      scheduleAuto();
     }
 
     const onVisibility = () => (document.hidden ? stop() : start());
@@ -553,6 +609,7 @@ export default function IcosahedronCanvas() {
 
     return () => {
       stop();
+      if (autoTimer) clearTimeout(autoTimer);
       io.disconnect();
       document.removeEventListener("visibilitychange", onVisibility);
       mount.removeEventListener("pointerdown", onPointerDown);

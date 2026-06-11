@@ -4,22 +4,24 @@ import { useEffect, useRef } from "react";
 
 /**
  * Mahta — animated product-analyst demo. A dark macOS window that cycles through:
- * a target prompt → "Researching" → "Driving browser" (a mini-browser stepping
- * through a competitor flow with friction / persuasion / gating flag pins) →
- * "Report ready" (a Market & Strategy brief + an annotated storyboard).
- * Phase is driven by [data-phase] on the window root. Auto-plays in view, loops,
- * respects prefers-reduced-motion (jumps straight to the finished report).
+ * research → a 3D capture deck driving a browser step-by-step through a competitor
+ * flow (each screen scanned, flagged for friction / persuasion / gating, then
+ * receding into a stack) → a finished report (Market & Strategy brief + annotated
+ * storyboard). Phase is driven by [data-phase] on the window root. Auto-plays in
+ * view, loops, respects prefers-reduced-motion (jumps to the finished report).
  *
- * All styling lives in globals.css (".mahta-win / .mq-* / .browser / .storyboard").
+ * All styling lives in globals.css (".mahta-win / .mq-* / .cap-* / .storyboard").
  */
-type Step = { addr: string; foot: string; top: string; prog: number; flag?: string; type?: string };
+type Cap = { th: string; url: string; cta: string; flag: string; flagClass: string; num: string };
 
-const STEPS: Step[] = [
-  { addr: "amazon.com/dp/B07… · product",  foot: "Step 1 / 4 · Product page",     top: "44%", prog: 32 },
-  { addr: "amazon.com/cart · subscribe offer", foot: "Step 2 / 4 · Subscribe offer", top: "36%", prog: 52, flag: "Save 15%",        type: "flag-persuade" },
-  { addr: "amazon.com/subscribe/options",  foot: "Step 3 / 4 · Choose frequency", top: "30%", prog: 72, flag: "Frequency buried", type: "flag-friction" },
-  { addr: "amazon.com/checkout/signin",    foot: "Step 4 / 4 · Gated checkout",   top: "50%", prog: 90, flag: "Account required", type: "flag-gate" },
+const CARDS: Cap[] = [
+  { th: "#ff9900", url: "amazon.com/dp/B07…",      cta: "Subscribe & Save",     flag: "Save 15%",        flagClass: "flag-persuade", num: "01" },
+  { th: "#2a6fdb", url: "amazon.com/subscribe",     cta: "Choose frequency",     flag: "Frequency buried", flagClass: "flag-friction", num: "02" },
+  { th: "#232329", url: "amazon.com/checkout",      cta: "Sign in to continue",  flag: "Account required", flagClass: "flag-gate",     num: "03" },
+  { th: "#1f8a5b", url: "amazon.com/manage/subs",   cta: "Manage subscription",  flag: "Cancel buried",    flagClass: "flag-friction", num: "04" },
 ];
+
+const CAPS = ["Product page", "Frequency options", "Gated checkout", "Manage subscription"];
 
 export default function MahtaDemo() {
   const rootRef = useRef<HTMLDivElement>(null);
@@ -30,43 +32,53 @@ export default function MahtaDemo() {
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const statEl = win.querySelector<HTMLElement>(".mq-stat");
     const progEl = win.querySelector<HTMLElement>(".mq-prog i");
-    const addrEl = win.querySelector<HTMLElement>(".b-addr");
-    const footEl = win.querySelector<HTMLElement>(".b-foot");
-    const flagEl = win.querySelector<HTMLElement>(".bp-flag");
-    const topEl = win.querySelector<HTMLElement>(".bp-top");
+    const cards = Array.from(win.querySelectorAll<HTMLElement>(".cap-card"));
     const briefs = Array.from(win.querySelectorAll<HTMLElement>(".rep-list [data-rep]"));
     const figs = Array.from(win.querySelectorAll<HTMLElement>(".storyboard [data-fig]"));
 
     let timers: number[] = [];
     let playing = false;
+    let active = -1;
     const at = (ms: number, fn: () => void) => timers.push(window.setTimeout(fn, ms));
     const clearTimers = () => { timers.forEach(clearTimeout); timers = []; };
     const setStat = (t: string) => { if (statEl) statEl.textContent = t; };
     const setProg = (p: number) => { if (progEl) progEl.style.width = p + "%"; };
 
-    const applyStep = (s: Step) => {
-      if (addrEl) addrEl.textContent = s.addr;
-      if (footEl) footEl.textContent = s.foot;
-      if (topEl) topEl.style.width = s.top;
-      setProg(s.prog);
-      if (!flagEl) return;
-      flagEl.classList.remove("show");
-      if (s.flag) {
-        flagEl.textContent = s.flag;
-        flagEl.className = "bp-flag " + s.type;
-        void flagEl.offsetWidth; // restart the entrance transition
-        flagEl.classList.add("show");
-      } else {
-        flagEl.className = "bp-flag";
-        flagEl.textContent = "";
-      }
+    const showCap = (i: number) => {
+      active = i;
+      setStat("Capturing " + (i + 1) + " / 4 · " + CAPS[i]);
+      setProg(24 + i * 19);
+      cards.forEach((c, idx) => {
+        c.classList.remove("is-active", "is-stacked", "is-upcoming", "capturing");
+        const off = active - idx;
+        if (idx === active) {
+          c.classList.add("is-active");
+          c.style.zIndex = "30";
+          c.style.setProperty("--off", "0");
+          void c.offsetWidth;
+          c.classList.add("capturing");
+          at(620, () => c.classList.add("captured"));
+        } else if (idx < active) {
+          c.classList.add("is-stacked", "captured");
+          c.style.setProperty("--off", String(off));
+          c.style.zIndex = String(29 - off);
+        } else {
+          c.classList.add("is-upcoming");
+          c.style.zIndex = "0";
+        }
+      });
     };
 
     const reset = () => {
       win.dataset.phase = "research";
+      active = -1;
+      cards.forEach((c) => {
+        c.classList.remove("is-active", "is-stacked", "capturing", "captured");
+        c.classList.add("is-upcoming");
+        c.style.zIndex = "0";
+      });
       briefs.forEach((b) => b.classList.remove("show"));
       figs.forEach((f) => f.classList.remove("show"));
-      flagEl?.classList.remove("show");
       setProg(8);
     };
 
@@ -74,18 +86,19 @@ export default function MahtaDemo() {
       clearTimers();
       reset();
       setStat("Researching program…");
-      at(1200, () => { win.dataset.phase = "browse"; setStat("Driving browser…"); applyStep(STEPS[0]); });
-      at(2150, () => applyStep(STEPS[1]));   // persuasion flag
-      at(3100, () => applyStep(STEPS[2]));   // friction flag
-      at(4050, () => applyStep(STEPS[3]));   // gating flag
-      at(5050, () => { setStat("Compiling report…"); setProg(100); });
-      at(5750, () => {
+      at(1200, () => { win.dataset.phase = "browse"; setStat("Planning the walkthrough…"); });
+      at(1700, () => showCap(0));
+      at(2750, () => showCap(1));
+      at(3800, () => showCap(2));
+      at(4850, () => showCap(3));
+      at(6000, () => { setStat("Compiling report…"); setProg(100); });
+      at(6700, () => {
         win.dataset.phase = "report";
         setStat("Report ready");
         briefs.forEach((b, i) => at(i * 260, () => b.classList.add("show")));
         figs.forEach((f, i) => at(1100 + i * 200, () => f.classList.add("show")));
       });
-      at(11400, () => { if (playing) play(); });
+      at(12800, () => { if (playing) play(); });
     };
 
     if (reduce) {
@@ -137,18 +150,28 @@ export default function MahtaDemo() {
 
           <div className="mq-stage">
             <div className="mq-work">
-              <div className="browser">
-                <div className="b-url">
-                  <span className="dots"><i></i><i></i><i></i></span>
-                  <span className="b-addr">amazon.com</span>
+              <div className="cap-scene">
+                <div className="cap-deck">
+                  {CARDS.map((c) => (
+                    <div className="cap-card is-upcoming" key={c.num}>
+                      <div className="cap-screen" style={{ ["--th" as string]: c.th }}>
+                        <div className="cap-chrome">
+                          <span className="cap-dots"><i></i><i></i><i></i></span>
+                          <span className="cap-url">{c.url}</span>
+                        </div>
+                        <div className="cap-page">
+                          <div className="cap-hero"></div>
+                          <div className="cap-ln a"></div>
+                          <div className="cap-ln b"></div>
+                          <div className="cap-cta">{c.cta}</div>
+                        </div>
+                        <div className="cap-scan" aria-hidden="true"></div>
+                      </div>
+                      <span className={`cap-flag ${c.flagClass}`}>{c.flag}</span>
+                      <span className="cap-num mono">{c.num}</span>
+                    </div>
+                  ))}
                 </div>
-                <div className="b-page">
-                  <div className="bp-top"></div>
-                  <div className="bp-rows"><span></span><span></span></div>
-                  <div className="bp-cta">Subscribe &amp; Save</div>
-                  <span className="bp-flag"></span>
-                </div>
-                <div className="b-foot">Launching browser…</div>
               </div>
             </div>
 
