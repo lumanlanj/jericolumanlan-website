@@ -21,11 +21,56 @@ export const KEYS = {
   count: (event: string) => `c:${event}`,
   countDay: (event: string, day: string) => `c:${event}:${day}`,
   uniqueHLL: "hll:visitors",
+  // Per-day visitor HyperLogLog, keyed by ET calendar date (YYYY-MM-DD). Lets the
+  // stats endpoint merge any date range (e.g. a Mon–Sun week) via PFCOUNT of the
+  // day keys. Forward-looking: only days recorded after this shipped have data.
+  uniqueHLLDay: (day: string) => `hll:visitors:${day}`,
   visits: (vid: string) => `v:${vid}`,
   returning: "c:returning",
   recent: "recent:events",
   sources: "h:sources", // hash: source label → first-visit count
 } as const;
+
+// HLL day keys expire well after any window we report on, to bound memory.
+export const HLL_DAY_TTL_SECONDS = 60 * 60 * 24 * 70; // 70 days
+
+// Today's calendar date in America/New_York (Jerico's timezone) as YYYY-MM-DD.
+// en-CA formats as ISO date. Used to key the per-day visitor HLL consistently
+// with the Mon–Sun week math below.
+export function etDay(now: Date = new Date()): string {
+  return new Intl.DateTimeFormat("en-CA", {
+    timeZone: "America/New_York",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(now);
+}
+
+// The seven ET calendar dates (YYYY-MM-DD, Mon→Sun) of the most recently
+// *completed* Monday–Sunday week. On a Monday this is the week that just ended
+// (e.g. 2026-06-15 → 2026-06-08 … 2026-06-14).
+export function lastCompleteWeekDaysET(now: Date = new Date()): string[] {
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "America/New_York",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    weekday: "short",
+  }).formatToParts(now);
+  const get = (t: string) => parts.find((x) => x.type === t)!.value;
+  const y = +get("year"), m = +get("month"), d = +get("day");
+  const dow = ({ Sun: 0, Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat: 6 } as Record<string, number>)[get("weekday")];
+  // Noon-UTC anchor on the ET date → whole-day arithmetic is DST-safe.
+  const anchor = new Date(Date.UTC(y, m - 1, d, 12));
+  const sinceMon = (dow + 6) % 7; // Mon→0 … Sun→6
+  const mon = new Date(anchor);
+  mon.setUTCDate(anchor.getUTCDate() - sinceMon - 7);
+  return Array.from({ length: 7 }, (_, i) => {
+    const x = new Date(mon);
+    x.setUTCDate(mon.getUTCDate() + i);
+    return x.toISOString().slice(0, 10);
+  });
+}
 
 // Normalize a client-supplied source label to a safe, bounded token before it
 // becomes a Redis hash field. Anything empty/garbage collapses to "direct".

@@ -1,5 +1,10 @@
 import { NextRequest } from "next/server";
-import { redis, KEYS, RECENT_MAX } from "@/lib/analytics-redis";
+import {
+  redis,
+  KEYS,
+  RECENT_MAX,
+  lastCompleteWeekDaysET,
+} from "@/lib/analytics-redis";
 
 // First-party stats read endpoint, polled by the SiteBar menu-bar app.
 // Token-protected (?key=) so the counts aren't publicly scrapeable. Returns
@@ -19,6 +24,7 @@ export async function GET(req: NextRequest) {
       configured: false,
       pageviews: 0,
       uniqueVisitors: 0,
+      uniqueVisitors7d: 0,
       returningVisitors: 0,
       resumeDownloads: 0,
       scrollBottoms: 0,
@@ -27,16 +33,29 @@ export async function GET(req: NextRequest) {
     });
   }
 
-  const [pageviews, returning, resume, scroll, unique, recentRaw, sourcesRaw] =
-    await Promise.all([
-      redis.get<number>(KEYS.count("pageview")),
-      redis.get<number>(KEYS.returning),
-      redis.get<number>(KEYS.count("resume_download")),
-      redis.get<number>(KEYS.count("scroll_bottom")),
-      redis.pfcount(KEYS.uniqueHLL),
-      redis.lrange(KEYS.recent, 0, RECENT_MAX - 1),
-      redis.hgetall<Record<string, string | number>>(KEYS.sources),
-    ]);
+  // Unique visitors over the last complete Mon–Sun week = cardinality of the
+  // union of that week's seven per-day HLLs (PFCOUNT merges multiple keys).
+  const weekKeys = lastCompleteWeekDaysET().map(KEYS.uniqueHLLDay);
+
+  const [
+    pageviews,
+    returning,
+    resume,
+    scroll,
+    unique,
+    unique7d,
+    recentRaw,
+    sourcesRaw,
+  ] = await Promise.all([
+    redis.get<number>(KEYS.count("pageview")),
+    redis.get<number>(KEYS.returning),
+    redis.get<number>(KEYS.count("resume_download")),
+    redis.get<number>(KEYS.count("scroll_bottom")),
+    redis.pfcount(KEYS.uniqueHLL),
+    redis.pfcount(...(weekKeys as [string, ...string[]])),
+    redis.lrange(KEYS.recent, 0, RECENT_MAX - 1),
+    redis.hgetall<Record<string, string | number>>(KEYS.sources),
+  ]);
 
   // First-visit counts per traffic source, biggest first.
   const sources = Object.entries(sourcesRaw ?? {})
@@ -63,6 +82,7 @@ export async function GET(req: NextRequest) {
       configured: true,
       pageviews: pageviews ?? 0,
       uniqueVisitors: unique ?? 0,
+      uniqueVisitors7d: unique7d ?? 0,
       returningVisitors: returning ?? 0,
       resumeDownloads: resume ?? 0,
       scrollBottoms: scroll ?? 0,

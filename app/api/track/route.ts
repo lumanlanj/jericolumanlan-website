@@ -5,9 +5,11 @@ import {
   ALLOWED_EVENTS,
   RECENT_MAX,
   VISIT_TTL_SECONDS,
+  HLL_DAY_TTL_SECONDS,
   isOwnerIp,
   clientIp,
   cleanSource,
+  etDay,
 } from "@/lib/analytics-redis";
 
 // First-party event ingest. The site POSTs anonymous events here:
@@ -53,6 +55,10 @@ export async function POST(req: NextRequest) {
     // Visitor uniqueness + returning detection (pageviews only).
     if (event === "pageview" && vid) {
       p.pfadd(KEYS.uniqueHLL, vid);
+      // Per-day HLL (ET) so the stats endpoint can report any date window.
+      const dayKey = KEYS.uniqueHLLDay(etDay());
+      p.pfadd(dayKey, vid);
+      p.expire(dayKey, HLL_DAY_TTL_SECONDS);
       p.incr(KEYS.visits(vid));
       p.expire(KEYS.visits(vid), VISIT_TTL_SECONDS);
     }
