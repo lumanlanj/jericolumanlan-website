@@ -25,6 +25,7 @@ export async function GET(req: NextRequest) {
       pageviews: 0,
       uniqueVisitors: 0,
       uniqueVisitors7d: 0,
+      dailyUnique: [],
       returningVisitors: 0,
       resumeDownloads: 0,
       scrollBottoms: 0,
@@ -35,7 +36,8 @@ export async function GET(req: NextRequest) {
 
   // Unique visitors over the last complete Mon–Sun week = cardinality of the
   // union of that week's seven per-day HLLs (PFCOUNT merges multiple keys).
-  const weekKeys = lastCompleteWeekDaysET().map(KEYS.uniqueHLLDay);
+  const weekDays = lastCompleteWeekDaysET();
+  const weekKeys = weekDays.map(KEYS.uniqueHLLDay);
 
   const [
     pageviews,
@@ -46,6 +48,7 @@ export async function GET(req: NextRequest) {
     unique7d,
     recentRaw,
     sourcesRaw,
+    dailyCounts,
   ] = await Promise.all([
     redis.get<number>(KEYS.count("pageview")),
     redis.get<number>(KEYS.returning),
@@ -55,7 +58,15 @@ export async function GET(req: NextRequest) {
     redis.pfcount(...(weekKeys as [string, ...string[]])),
     redis.lrange(KEYS.recent, 0, RECENT_MAX - 1),
     redis.hgetall<Record<string, string | number>>(KEYS.sources),
+    // Per-day uniques: one PFCOUNT per day key, in Mon→Sun order.
+    Promise.all(weekKeys.map((k) => redis!.pfcount(k))),
   ]);
+
+  // Zero-filled per-day unique visitors for the week (Mon→Sun).
+  const dailyUnique = weekDays.map((day, i) => ({
+    day,
+    count: dailyCounts[i] ?? 0,
+  }));
 
   // First-visit counts per traffic source, biggest first.
   const sources = Object.entries(sourcesRaw ?? {})
@@ -83,6 +94,7 @@ export async function GET(req: NextRequest) {
       pageviews: pageviews ?? 0,
       uniqueVisitors: unique ?? 0,
       uniqueVisitors7d: unique7d ?? 0,
+      dailyUnique,
       returningVisitors: returning ?? 0,
       resumeDownloads: resume ?? 0,
       scrollBottoms: scroll ?? 0,
