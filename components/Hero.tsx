@@ -45,8 +45,8 @@ export default function Hero() {
               </p>
               <p>
                 Outside of shipping, I build agents I actually use day to day, and I treat this site
-                as a working log of that craft. Off the clock, I&rsquo;m a beginner runner and get
-                into Olympic-style weightlifting here and there.
+                as a working log of that craft. Off the clock, I&rsquo;m a runner and previously
+                competed in Olympic-style weightlifting &mdash; these days I just lift casually.
               </p>
             </div>
           </div>
