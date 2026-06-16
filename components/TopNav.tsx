@@ -19,7 +19,6 @@ function trackResumeDownload() {
 
 const TABS = [
   { id: "about", label: "About" },
-  { id: "work", label: "Work" },
   { id: "lab", label: "Lab" },
   { id: "writing", label: "Writing" },
 ];

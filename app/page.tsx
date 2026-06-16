@@ -1,7 +1,10 @@
 import { fetchMedium } from "@/lib/medium";
 import { fetchSubstack } from "@/lib/substack";
+import { fetchGitHubEvents } from "@/lib/githubEvents";
 import { mergeWriting } from "@/lib/writing";
+import { buildTickerItems } from "@/lib/ticker";
 import Hero from "@/components/Hero";
+import ActivityTicker from "@/components/ActivityTicker";
 import CarlDemo from "@/components/CarlDemo";
 import MahtaDemo from "@/components/MahtaDemo";
 import RevealController from "@/components/RevealController";
@@ -10,116 +13,27 @@ import SectionIndex from "@/components/SectionIndex";
 export const revalidate = 0;
 
 export default async function Home() {
-  const [medium, substack] = await Promise.all([fetchMedium(), fetchSubstack()]);
+  const [medium, substack, ghEvents] = await Promise.all([
+    fetchMedium(),
+    fetchSubstack(),
+    fetchGitHubEvents(),
+  ]);
   const recentWriting = mergeWriting(medium, substack).slice(0, 5);
 
-  // Hero "Latest" strip candidates — the client filters these to the last 7 days.
-  const latest = recentWriting.map((w) => ({
-    type: "Blog post",
-    title: w.title,
-    url: w.url,
-    date: w.timestamp.slice(0, 10),
-  }));
+  // Activity ticker — live GitHub events + posts from the last 7 days, newest-first.
+  const tickerItems = buildTickerItems(recentWriting, ghEvents);
 
   return (
     <>
+      <ActivityTicker items={tickerItems} />
       <SectionIndex />
-      <Hero latest={latest} />
-
-      {/* PROOF — career impact by the numbers */}
-      <section className="proof" aria-label="Career impact by the numbers">
-        <div className="container">
-          <p className="proof-frame reveal"><span className="rule" aria-hidden="true"></span><span>Impact <span className="accent">&mdash; across climate tech &amp; e-commerce</span></span></p>
-          <div className="proof-grid">
-            <div className="stat reveal">
-              <div className="stat-fig">
-                <span data-count="5.8" data-prefix="$" data-suffix="M+" data-decimals="1">$5.8M+</span>
-              </div>
-              <div className="stat-cap">Incremental revenue generated through experimentation and journey design</div>
-            </div>
-            <div className="stat reveal">
-              <div className="stat-fig">
-                <span data-count="1" data-prefix="~$" data-suffix="B" data-decimals="0">~$1B</span>
-              </div>
-              <div className="stat-cap">Annual digital-commerce revenue influenced</div>
-            </div>
-            <div className="stat reveal">
-              <div className="stat-fig">
-                <span data-count="85" data-suffix="%" data-decimals="0">85%</span>
-              </div>
-              <div className="stat-cap">AI returns-prediction accuracy, lifted from 40%</div>
-            </div>
-            <div className="stat reveal">
-              <div className="stat-fig">
-                <span data-count="80" data-prefix="~" data-suffix="%" data-decimals="0">~80%</span>
-              </div>
-              <div className="stat-cap">Compliance-reporting effort cut for multi-market ops</div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ABOUT */}
-      <section className="block" id="about">
-        <div className="container">
-          <p className="eyebrow reveal"><span className="num">01</span><span className="rule" aria-hidden="true"></span><span>About</span></p>
-          <div className="bio reveal">
-            <p>I&rsquo;m a product manager in climate tech, currently at <span className="ink">Xpansiv</span> &mdash; before that, <span className="ink">Staples</span> and <span className="ink">Pitney Bowes</span>. I care about products that hold up under real constraints, where customer needs, business goals, and technical reality each get a seat at the table.</p>
-            <p>My working principle is simple: every meaningful decision needs multiple stakeholders, each bringing their own expertise. The product manager&rsquo;s job is to make sure none of those voices gets lost on the way to a decision.</p>
-            <p>Outside of shipping, I build agents I actually use day to day, and I treat this site as a working log of that craft.</p>
-          </div>
-        </div>
-      </section>
-
-      {/* SELECTED WORK — roles */}
-      <section className="block" id="work">
-        <div className="container">
-          <p className="eyebrow reveal"><span className="num">02</span><span className="rule" aria-hidden="true"></span><span>Selected work</span></p>
-          <p className="section-lede reveal">Five years of shipping revenue, AI, and regulatory-compliance products &mdash; for enterprises like REI and Nordstrom and for Staples&rsquo; highest-revenue commerce programs.</p>
-          <div className="roles">
-            <article className="role reveal">
-              <div className="role-label">
-                <h3 className="role-co">Xpansiv <span className="role-tag">Blackstone · Goldman Sachs</span></h3>
-                <p className="role-title mono">PM, Managed Solutions · Clean Transportation</p>
-                <p className="role-dates mono">2025 — Present</p>
-              </div>
-              <ul className="role-wins">
-                <li>Built a bulk-upload tool that cut multi-account EV-charging usage reporting effort <b>~80%</b> — automating the data backbone of environmental-credit generation.</li>
-                <li>Led the product&rsquo;s launch into <b>New Mexico</b>, a new state compliance market, unlocking a new revenue stream and expanding the regulatory footprint.</li>
-              </ul>
-            </article>
-
-            <article className="role reveal">
-              <div className="role-label">
-                <h3 className="role-co">Staples</h3>
-                <p className="role-title mono">PM, Order Management &amp; Subscriptions</p>
-                <p className="role-dates mono">2024 — 2025</p>
-              </div>
-              <ul className="role-wins">
-                <li>Owned roadmap and experimentation across AutoRestock, Lists, and Purchase History — Staples&rsquo; highest-revenue digital commerce programs, driving <b>~$1B</b> in annualized revenue.</li>
-                <li>Launched and A/B-tested a &ldquo;Buy It Again&rdquo; CTA whose winning variant drove <b>$3.8M</b> in incremental revenue — beating the $4M annual target two quarters early.</li>
-              </ul>
-            </article>
-
-            <article className="role reveal">
-              <div className="role-label">
-                <h3 className="role-co">Pitney Bowes</h3>
-                <p className="role-title mono">PM, Returns Experience · B2B Enterprise</p>
-                <p className="role-dates mono">2021 — 2024</p>
-              </div>
-              <ul className="role-wins">
-                <li>Led the end-to-end launch of an <b>AI/ML-powered Returns Report</b> with data scientists and enterprise clients (REI, Nordstrom) — lifting prediction accuracy from <b>40% to 85%</b>.</li>
-                <li>Migrated <b>200+ clients</b> to the Pitney Bowes API — saving $0.5M annually and reducing support tickets <b>70%</b>.</li>
-              </ul>
-            </article>
-          </div>
-        </div>
-      </section>
+      {/* HERO — identity + impact (merges About bio + Proof stats), anchored #about */}
+      <Hero />
 
       {/* THE LAB */}
       <section className="block" id="lab">
         <div className="container">
-          <p className="eyebrow reveal"><span className="num">03</span><span className="rule" aria-hidden="true"></span><span>The Lab</span></p>
+          <p className="eyebrow reveal"><span className="num">02</span><span className="rule" aria-hidden="true"></span><span>The Lab</span></p>
           <p className="section-lede reveal">Agents and tools I build for myself and actually use day to day &mdash; where I keep my craft sharp and test what AI products should feel like.</p>
           <div className="work-list">
             <div>
@@ -151,13 +65,28 @@ export default async function Home() {
               </div>
             </div>
           </div>
+
+          {/* GitHub — tinkering in public */}
+          <div className="tinker reveal">
+            <div className="tinker-glyph">
+              <svg className="gh" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+                <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0016 8c0-4.42-3.58-8-8-8z" />
+              </svg>
+            </div>
+            <div>
+              <span className="tinker-eyebrow"><span className="ws-dot" aria-hidden="true"></span>Tinkering in public</span>
+              <h3 className="tinker-h">I tinker. Here&rsquo;s the workbench.</h3>
+              <p className="tinker-p">Rough experiments, half-finished tools, and the occasional thing that actually works &mdash; all out in the open. If you want to see how I think by what I make, it&rsquo;s here.</p>
+            </div>
+            <a className="work-cta" href="https://github.com/lumanlanj" target="_blank" rel="noopener">View GitHub <span className="cta-arrow" aria-hidden="true">↗</span></a>
+          </div>
         </div>
       </section>
 
       {/* WRITING */}
       <section className="block" id="writing">
         <div className="container">
-          <p className="eyebrow reveal"><span className="num">04</span><span className="rule" aria-hidden="true"></span><span>Writing</span></p>
+          <p className="eyebrow reveal"><span className="num">03</span><span className="rule" aria-hidden="true"></span><span>Writing</span></p>
           {recentWriting.length === 0 ? (
             <p className="section-lede">No posts available right now.</p>
           ) : (
@@ -181,7 +110,7 @@ export default async function Home() {
       {/* CONTACT / FOOTER */}
       <footer className="site-footer" id="contact">
         <div className="container">
-          <p className="eyebrow reveal"><span className="num">05</span><span className="rule" aria-hidden="true"></span><span>Contact</span></p>
+          <p className="eyebrow reveal"><span className="num">04</span><span className="rule" aria-hidden="true"></span><span>Contact</span></p>
           <div className="contact-grid">
             <div className="contact-lead reveal">
               <p className="footer-cta">Let&rsquo;s build something that holds up.</p>

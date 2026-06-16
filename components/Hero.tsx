@@ -1,97 +1,108 @@
-"use client";
-
-import { useEffect, useRef, useState } from "react";
 import IcosahedronCanvas from "@/components/IcosahedronCanvas";
-import HeroLatest, { type LatestItem } from "@/components/HeroLatest";
 
 /**
- * Full-viewport landing hero: the particle orb morphs through the three domains
- * Jerico works across (Climate → Commerce → AI), with a technical-drawing
- * callout that tracks the active shape. Intro copy + a bordered stat block are
- * pinned bottom-left. A CSS radial gradient is the WebGL fallback.
+ * Split hero — identity + impact on the first screen (merges the old About bio
+ * and Proof stats band). Left column: name/role, three-paragraph bio, and a
+ * Now / Previously / Based spec list. Right column: a credibility panel of four
+ * impact stats that count up on load. The signature WebGL orb is dimmed to an
+ * ambient background; a CSS radial gradient is the fallback. Anchored at #about
+ * (the top-nav "About" link scrolls here). Stacks to a single column — bio
+ * first, panel last — below 900px.
  */
-const DOMAINS = [
-  { fig: "01", name: "Climate", desc: "Environmental markets & compliance" },
-  { fig: "02", name: "Commerce", desc: "Marketplaces & subscriptions" },
-  { fig: "03", name: "AI", desc: "Agents & ML products" },
-] as const;
-
-export default function Hero({ latest = [] }: { latest?: LatestItem[] }) {
-  const [domain, setDomain] = useState(0);
-  const hintRef = useRef<HTMLDivElement>(null);
-  const d = DOMAINS[domain];
-
-  // One-shot interaction hint: slides in ~1.2s after load, then leaves.
-  useEffect(() => {
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    const t = window.setTimeout(() => hintRef.current?.classList.add("is-playing"), 1200);
-    return () => clearTimeout(t);
-  }, []);
-
+export default function Hero() {
   return (
-    <section className="hero">
-      <IcosahedronCanvas onDomainChange={setDomain} />
+    <section className="hero" id="about">
+      <IcosahedronCanvas />
 
-      {/* Orb interaction hint — slides down from under the nav, holds, then leaves once. */}
-      <div className="orb-hint" ref={hintRef} aria-hidden="true">
-        <span className="orb-hint-hand">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-            <path d="M18 11V6a2 2 0 0 0-2-2 2 2 0 0 0-2 2 2 2 0 0 0-2-2 2 2 0 0 0-2 2v0a2 2 0 0 0-2-2 2 2 0 0 0-2 2v8" />
-            <path d="M14 10V4a2 2 0 0 0-2-2 2 2 0 0 0-2 2v2M10 10.5V6a2 2 0 0 0-2-2 2 2 0 0 0-2 2v8a8 8 0 0 0 8 8h2a8 8 0 0 0 8-8v-1a2 2 0 0 0-2-2 2 2 0 0 0-2 2" />
-          </svg>
-        </span>
-        <span>Drag to rotate</span>
-        <span className="orb-hint-dot" />
-        <span>Double-click to shift</span>
-      </div>
-
-      {/* Legibility scrim behind the intro. */}
+      {/* Legibility scrim over the orb. */}
       <div className="hero-scrim" />
 
-      {/* Orb domain callout — technical-drawing annotation, tracks the orb. */}
-      <figure className="orb-callout is-in" aria-hidden="true">
-        <span className="oc-rule" />
-        <span className="oc-fig">FIG · {d.fig} / 03</span>
-        {/* Keyed by domain so the rise animation replays on every morph. */}
-        <span className="oc-name" key={`n${domain}`}>{d.name}</span>
-        <span className="oc-desc" key={`d${domain}`}>{d.desc}</span>
-      </figure>
-
-      {/* Intro statement, bottom-left. */}
-      <div className="hero-intro">
-        <div className="wrap">
-          {/* Identity lockup: name as a confident display line, role in mono beneath. */}
-          <div className="hero-name">
-            <p className="hn-name">Jerico Lumanlan</p>
-            <p className="hn-role">Product Manager</p>
-          </div>
-          <h1>Building products that hold up under real constraints.</h1>
-          <p className="lede">
-            I build AI-enabled, revenue-generating, and compliance-driven products across climate
-            tech and e-commerce &mdash; shipping work that has influenced{" "}
-            <span className="lede-ink">~$1B in annual revenue</span>.
+      <div className="hero-wrap">
+        <div className="hero-grid">
+          <p className="hero-kicker">
+            <span className="hero-name">Jerico Lumanlan</span>
+            <span className="hero-role">Product Manager · AI · Revenue · Compliance</span>
           </p>
-          {/* Recency strip — shows posts/ships from the last 7 days, else nothing. */}
-          <HeroLatest items={latest} />
-          <dl className="hero-meta">
-            <div className="hm-cell">
-              <dt>Now</dt>
-              <dd>Xpansiv — PM, Managed Solutions (Clean Transportation)</dd>
+
+          <div className="hero-id">
+            <div className="hero-bio">
+              <p>
+                I&rsquo;m a product manager at a climate-tech unicorn, <b>Xpansiv</b> &mdash; backed by
+                Aramco, Bank of America, and Goldman Sachs. As a former UX designer, I care about
+                products that hold up under real constraints &mdash; where customer needs, business
+                goals, and technical reality each get a seat at the table.
+              </p>
+              <p>
+                My working principle is simple: every meaningful decision needs multiple stakeholders,
+                each bringing their own expertise &mdash; and the product manager&rsquo;s job is to make
+                sure none of those voices gets lost on the way to a decision.
+              </p>
+              <p>
+                What excites me about product management is working at both altitudes: strategizing
+                at the 10,000-foot level, then dropping in to sweat the pixels &mdash; all while
+                bringing real value to the business and building experiences that feel genuinely
+                delightful.
+              </p>
+              <p>
+                Outside of shipping, I build agents I actually use day to day, and I treat this site
+                as a working log of that craft. Off the clock, I&rsquo;m a beginner runner and get
+                into Olympic-style weightlifting here and there.
+              </p>
             </div>
-            <div className="hm-cell">
-              <dt>Previously</dt>
-              <dd>Staples · Spotify · Pitney Bowes</dd>
+
+            <dl className="hero-meta">
+              <div className="hm-cell">
+                <dt>Now</dt>
+                <dd>Xpansiv — PM, Managed Solutions (Clean Transportation)</dd>
+              </div>
+              <div className="hm-cell">
+                <dt>Previously</dt>
+                <dd>Staples · Spotify · Pitney Bowes</dd>
+              </div>
+              <div className="hm-cell">
+                <dt>Based</dt>
+                <dd>Boston, Massachusetts</dd>
+              </div>
+            </dl>
+          </div>
+
+          <aside className="hero-cred" aria-label="Career impact by the numbers">
+            <p className="cred-head">
+              <span className="rule" aria-hidden="true" />
+              <span>
+                Impact <span className="accent">&mdash; climate tech &amp; e-commerce</span>
+              </span>
+            </p>
+            <div className="cred-stat">
+              <span className="cs-fig">
+                <span data-count="5.8" data-prefix="$" data-suffix="M+" data-decimals="1">$5.8M+</span>
+              </span>
+              <span className="cs-cap">Incremental revenue generated through experimentation &amp; journey design</span>
             </div>
-            <div className="hm-cell">
-              <dt>Based</dt>
-              <dd>Boston, Massachusetts</dd>
+            <div className="cred-stat">
+              <span className="cs-fig">
+                <span data-count="1" data-prefix="~$" data-suffix="B" data-decimals="0">~$1B</span>
+              </span>
+              <span className="cs-cap">Annual digital-commerce revenue influenced</span>
             </div>
-          </dl>
+            <div className="cred-stat">
+              <span className="cs-fig">
+                <span data-count="85" data-suffix="%" data-decimals="0">85%</span>
+              </span>
+              <span className="cs-cap">AI returns-prediction accuracy, lifted from 40%</span>
+            </div>
+            <div className="cred-stat">
+              <span className="cs-fig">
+                <span data-count="80" data-prefix="~" data-suffix="%" data-decimals="0">~80%</span>
+              </span>
+              <span className="cs-cap">Compliance-reporting effort cut for multi-market ops</span>
+            </div>
+          </aside>
         </div>
       </div>
 
-      {/* Scroll cue. */}
-      <a href="#about" aria-label="Scroll to about" className="hero-scroll-cue">
+      {/* Scroll cue — anchors to the next section. */}
+      <a href="#lab" aria-label="Scroll to the lab" className="hero-scroll-cue">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden="true">
           <path d="M12 5v14M6 13l6 6 6-6" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
