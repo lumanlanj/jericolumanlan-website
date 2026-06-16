@@ -468,20 +468,22 @@ figcaption.flag::before { content: ""; width: 4px; height: 4px; border-radius: 5
 
 /* Spec list — Now / Previously / Based. */
 .hero-meta { margin: 30px 0 0; padding: 0; display: flex; flex-direction: column; max-width: 52ch; border: 0; }
-.hm-cell { display: grid; grid-template-columns: 116px 1fr; gap: 18px; padding: 13px 0; border-top: 1px solid rgba(255,255,255,0.12); }
+/* Swapped rows: the value (dd) is the prominent white element on the left; the
+   label (dt) is a small mono tag, right-aligned on the right. */
+.hm-cell { display: grid; grid-template-columns: 1fr auto; gap: 18px; padding: 13px 0; border-top: 1px solid rgba(255,255,255,0.12); align-items: baseline; }
 .hm-cell:first-child { border-top: 0; }
-.hm-cell dt { font-family: var(--font-mono); font-size: 10px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.18em; color: rgba(255,255,255,0.42); margin: 0; padding-top: 2px; }
-.hm-cell dd { margin: 0; font-size: 14px; line-height: 1.45; color: rgba(255,255,255,0.84); }
+.hm-cell dd { grid-column: 1; grid-row: 1; margin: 0; font-size: 14px; line-height: 1.45; color: #fff; }
+.hm-cell dt { grid-column: 2; grid-row: 1; text-align: right; font-family: var(--font-mono); font-size: 10px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.18em; color: rgba(255,255,255,0.42); margin: 0; }
 
-/* "Mono decode" reveal on the spec-list labels (Now/Previously/Based) — each
-   label scrambles through random chars then resolves. In-flux chars tint blue.
-   Labels start hidden only when JS is active and the list opts in (data-decode);
-   no-JS visitors see them at full opacity. Driven by RevealController. */
-.hm-cell dt .scram { color: var(--color-accent); }
-.js .hero-meta[data-decode] dt { opacity: 0; }
-.hero-meta.decoded dt { opacity: 1; }
+/* "Mono decode" reveal — the VALUES (dd) scramble through random chars then
+   resolve; in-flux chars tint blue. Values start hidden only when JS is active
+   and the list opts in (data-decode); no-JS visitors see them at full opacity.
+   Driven by RevealController. */
+.hm-cell dd .scram { color: var(--color-accent); }
+.js .hero-meta[data-decode] dd { opacity: 0; }
+.hero-meta.decoded dd { opacity: 1; }
 @media (prefers-reduced-motion: reduce) {
-  .js .hero-meta[data-decode] dt { opacity: 1; }
+  .js .hero-meta[data-decode] dd { opacity: 1; }
 }
 
 /* Credibility panel — impact stats with count-up. */

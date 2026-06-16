@@ -5,8 +5,8 @@ import { useEffect } from "react";
 /**
  * Progressive-enhancement controller for the homepage: reveals `.reveal` blocks
  * on scroll, counts up `[data-count]` figures in the impact panel, and runs the
- * "mono decode" scramble on the hero spec-list labels (`.hero-meta[data-decode]`
- * → the Now/Previously/Based `<dt>`s). Mirrors the vanilla design prototype.
+ * "mono decode" scramble on the hero spec-list values (`.hero-meta[data-decode]`
+ * → the `<dd>` values). Mirrors the vanilla design prototype.
  * Content is server-rendered visible (and with final stat/label values), so
  * no-JS / reduced-motion visitors lose nothing.
  */
@@ -35,18 +35,18 @@ export default function RevealController() {
       requestAnimationFrame(step);
     };
 
-    // Mono decode: scramble each label through random chars, settling left→right.
+    // Mono decode: scramble each value through random chars, settling left→right.
     // The first floor(frame/total * len) chars are real; the rest are random
     // glyphs wrapped in .scram (blue tint). Spaces always render as spaces.
     const DECODE_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789·—#@%";
     const intervals: number[] = [];
     const timeouts: number[] = [];
-    const decode = (dt: HTMLElement, order: number) => {
-      const final = dt.dataset.final ?? (dt.dataset.final = dt.textContent ?? "");
+    const decode = (el: HTMLElement, order: number) => {
+      const final = el.dataset.final ?? (el.dataset.final = el.textContent ?? "");
       const len = final.length;
       const total = 16 + order * 4; // later rows take slightly longer
       let frame = 0;
-      dt.style.opacity = "1";
+      el.style.opacity = "1";
       const iv = window.setInterval(() => {
         frame++;
         const settled = Math.floor((frame / total) * len);
@@ -56,10 +56,10 @@ export default function RevealController() {
           if (c < settled || ch === " ") out += ch;
           else out += '<span class="scram">' + DECODE_CHARS[(Math.random() * DECODE_CHARS.length) | 0] + "</span>";
         }
-        dt.innerHTML = out;
+        el.innerHTML = out;
         if (frame >= total) {
           clearInterval(iv);
-          dt.textContent = final; // clean final state, no stray spans
+          el.textContent = final; // clean final state, no stray spans
         }
       }, 45);
       intervals.push(iv);
@@ -68,8 +68,8 @@ export default function RevealController() {
       if (!decodeList) return;
       decodeList.classList.add("decoded");
       // Stagger rows; the leading 220ms lets the count-up read first.
-      Array.from(decodeList.querySelectorAll<HTMLElement>("dt")).forEach((dt, i) => {
-        timeouts.push(window.setTimeout(() => decode(dt, i), 220 + i * 130));
+      Array.from(decodeList.querySelectorAll<HTMLElement>("dd")).forEach((el, i) => {
+        timeouts.push(window.setTimeout(() => decode(el, i), 220 + i * 130));
       });
     };
 
