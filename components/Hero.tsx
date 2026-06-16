@@ -49,7 +49,9 @@ export default function Hero() {
                 into Olympic-style weightlifting here and there.
               </p>
             </div>
+          </div>
 
+          <div className="hero-aside">
             <dl className="hero-meta">
               <div className="hm-cell">
                 <dt>Now</dt>
@@ -64,9 +66,8 @@ export default function Hero() {
                 <dd>Boston, Massachusetts</dd>
               </div>
             </dl>
-          </div>
 
-          <aside className="hero-cred" aria-label="Career impact by the numbers">
+            <aside className="hero-cred" aria-label="Career impact by the numbers">
             <p className="cred-head">
               <span className="rule" aria-hidden="true" />
               <span>
@@ -98,6 +99,7 @@ export default function Hero() {
               <span className="cs-cap">Compliance-reporting effort cut for multi-market ops</span>
             </div>
           </aside>
+          </div>
         </div>
       </div>
 

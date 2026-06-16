@@ -496,7 +496,10 @@ figcaption.flag::before { content: ""; width: 4px; height: 4px; border-radius: 5
   .hero-grid { grid-template-columns: 1.05fr 0.95fr; column-gap: 72px; row-gap: 0; }
   .hero-kicker { grid-column: 1; grid-row: 1; }
   .hero-id { grid-column: 1; grid-row: 2; }
-  .hero-cred { grid-column: 2; grid-row: 2; align-self: start; }
+  /* Right column: spec list (Now/Previously/Based) stacked above the impact box. */
+  .hero-aside { grid-column: 2; grid-row: 2; align-self: start; }
+  .hero-aside .hero-meta { margin-top: 0; }   /* top-align spec list with the first bio line */
+  .hero-aside .hero-cred { margin-top: 28px; } /* gap between spec list and impact box */
   .hero-name { font-size: 30px; }
   .hero-bio p { font-size: 17px; }
   .cs-fig { font-size: 34px; }
