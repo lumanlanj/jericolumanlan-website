@@ -61,10 +61,34 @@ export default async function Home() {
       {/* HERO — identity + impact (merges About bio + Proof stats), anchored #about */}
       <Hero />
 
+      {/* WRITING */}
+      <section className="block" id="writing">
+        <div className="container">
+          <p className="eyebrow reveal"><span className="num">02</span><span className="rule" aria-hidden="true"></span><span>Writing</span></p>
+          {recentWriting.length === 0 ? (
+            <p className="section-lede">No posts available right now.</p>
+          ) : (
+            <ul className="writing-list">
+              {recentWriting.map((item) => (
+                <li key={item.id} className="reveal">
+                  <a href={item.url} target="_blank" rel="noopener">
+                    <span className="writing-title">{item.title}</span>
+                    <time className="writing-date" dateTime={item.timestamp}>
+                      {item.timestamp.slice(0, 10)}
+                    </time>
+                  </a>
+                </li>
+              ))}
+            </ul>
+          )}
+          <a className="all-writing reveal" href="/writing">All writing →</a>
+        </div>
+      </section>
+
       {/* THE LAB */}
       <section className="block" id="lab">
         <div className="container">
-          <p className="eyebrow reveal"><span className="num">02</span><span className="rule" aria-hidden="true"></span><span>The Lab</span></p>
+          <p className="eyebrow reveal"><span className="num">03</span><span className="rule" aria-hidden="true"></span><span>The Lab</span></p>
           <p className="section-lede reveal">Agents and tools I build for myself and actually use day to day &mdash; where I keep my craft sharp and test what AI products should feel like.</p>
           <div className="work-list">
             <div>
@@ -111,30 +135,6 @@ export default async function Home() {
             </div>
             <a className="work-cta" href="https://github.com/lumanlanj" target="_blank" rel="noopener">View GitHub <span className="cta-arrow" aria-hidden="true">↗</span></a>
           </div>
-        </div>
-      </section>
-
-      {/* WRITING */}
-      <section className="block" id="writing">
-        <div className="container">
-          <p className="eyebrow reveal"><span className="num">03</span><span className="rule" aria-hidden="true"></span><span>Writing</span></p>
-          {recentWriting.length === 0 ? (
-            <p className="section-lede">No posts available right now.</p>
-          ) : (
-            <ul className="writing-list">
-              {recentWriting.map((item) => (
-                <li key={item.id} className="reveal">
-                  <a href={item.url} target="_blank" rel="noopener">
-                    <span className="writing-title">{item.title}</span>
-                    <time className="writing-date" dateTime={item.timestamp}>
-                      {item.timestamp.slice(0, 10)}
-                    </time>
-                  </a>
-                </li>
-              ))}
-            </ul>
-          )}
-          <a className="all-writing reveal" href="/writing">All writing →</a>
         </div>
       </section>
 

@@ -104,7 +104,7 @@ export default function Hero() {
       </div>
 
       {/* Scroll cue — anchors to the next section. */}
-      <a href="#lab" aria-label="Scroll to the lab" className="hero-scroll-cue">
+      <a href="#writing" aria-label="Scroll to writing" className="hero-scroll-cue">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden="true">
           <path d="M12 5v14M6 13l6 6 6-6" strokeLinecap="round" strokeLinejoin="round" />
         </svg>

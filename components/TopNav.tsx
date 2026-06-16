@@ -19,8 +19,8 @@ function trackResumeDownload() {
 
 const TABS = [
   { id: "about", label: "About" },
-  { id: "lab", label: "Lab" },
   { id: "writing", label: "Writing" },
+  { id: "lab", label: "Lab" },
 ];
 
 export default function TopNav() {

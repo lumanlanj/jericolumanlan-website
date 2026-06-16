@@ -8,8 +8,8 @@ import { useEffect, useRef } from "react";
  */
 const ITEMS = [
   { id: "about", label: "About", num: "01" },
-  { id: "lab", label: "Lab", num: "02" },
-  { id: "writing", label: "Writing", num: "03" },
+  { id: "writing", label: "Writing", num: "02" },
+  { id: "lab", label: "Lab", num: "03" },
   { id: "contact", label: "Contact", num: "04" },
 ];
 
