@@ -473,6 +473,17 @@ figcaption.flag::before { content: ""; width: 4px; height: 4px; border-radius: 5
 .hm-cell dt { font-family: var(--font-mono); font-size: 10px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.18em; color: rgba(255,255,255,0.42); margin: 0; padding-top: 2px; }
 .hm-cell dd { margin: 0; font-size: 14px; line-height: 1.45; color: rgba(255,255,255,0.84); }
 
+/* "Mono decode" reveal on the spec-list labels (Now/Previously/Based) — each
+   label scrambles through random chars then resolves. In-flux chars tint blue.
+   Labels start hidden only when JS is active and the list opts in (data-decode);
+   no-JS visitors see them at full opacity. Driven by RevealController. */
+.hm-cell dt .scram { color: var(--color-accent); }
+.js .hero-meta[data-decode] dt { opacity: 0; }
+.hero-meta.decoded dt { opacity: 1; }
+@media (prefers-reduced-motion: reduce) {
+  .js .hero-meta[data-decode] dt { opacity: 1; }
+}
+
 /* Credibility panel — impact stats with count-up. */
 .hero-cred { border: 1px solid var(--color-border); background: rgba(10,9,18,0.46); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
 .cred-head { display: flex; align-items: center; gap: 13px; margin: 0; padding: 17px 24px; border-bottom: 1px solid var(--color-border); font-family: var(--font-mono); font-size: 10.5px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.16em; color: rgba(255,255,255,0.55); }

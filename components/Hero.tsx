@@ -52,7 +52,7 @@ export default function Hero() {
           </div>
 
           <div className="hero-aside">
-            <dl className="hero-meta">
+            <dl className="hero-meta" data-decode="">
               <div className="hm-cell">
                 <dt>Now</dt>
                 <dd>Xpansiv — PM, Managed Solutions (Clean Transportation)</dd>
