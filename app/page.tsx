@@ -12,6 +12,33 @@ import SectionIndex from "@/components/SectionIndex";
 
 export const revalidate = 0;
 
+export const metadata = {
+  alternates: { canonical: "/" },
+};
+
+// Person entity for branded search — helps Google connect jericolumanlan.com to
+// the off-site profiles (sameAs) and build a knowledge entity for the name.
+const personJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "Person",
+  name: "Jerico Lumanlan",
+  url: "https://jericolumanlan.com",
+  jobTitle: "Product Manager",
+  worksFor: { "@type": "Organization", name: "Xpansiv" },
+  address: {
+    "@type": "PostalAddress",
+    addressLocality: "Boston",
+    addressRegion: "MA",
+    addressCountry: "US",
+  },
+  sameAs: [
+    "https://www.linkedin.com/in/jerico-lumanlan",
+    "https://x.com/jericolumanlan",
+    "https://jericolumanlan.medium.com",
+    "https://github.com/lumanlanj",
+  ],
+};
+
 export default async function Home() {
   const [medium, substack, ghEvents] = await Promise.all([
     fetchMedium(),
@@ -25,6 +52,10 @@ export default async function Home() {
 
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(personJsonLd) }}
+      />
       <ActivityTicker items={tickerItems} />
       <SectionIndex />
       {/* HERO — identity + impact (merges About bio + Proof stats), anchored #about */}

@@ -5,6 +5,12 @@ import Container from "@/components/Container";
 
 export const revalidate = 0;
 
+export const metadata = {
+  title: "Log — Jerico Lumanlan",
+  description: "Working notes and short-form writing by Jerico Lumanlan.",
+  alternates: { canonical: "/log" },
+};
+
 export default async function LogPage() {
   const entries = await readLogEntries();
 

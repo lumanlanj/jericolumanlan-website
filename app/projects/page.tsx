@@ -3,6 +3,13 @@ import Container from "@/components/Container";
 
 export const revalidate = 0;
 
+export const metadata = {
+  title: "Projects — Jerico Lumanlan",
+  description:
+    "Agents and tools Jerico Lumanlan builds and uses day to day, including Carl and Mahta.",
+  alternates: { canonical: "/projects" },
+};
+
 export default async function ProjectsPage() {
   const projects = await readProjects();
 

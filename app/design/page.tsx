@@ -7,6 +7,7 @@ export const revalidate = 0;
 export const metadata = {
   title: "Design Exploration — Jerico Lumanlan",
   description: "Selected design work and explorations.",
+  alternates: { canonical: "/design" },
 };
 
 export default async function DesignPage() {

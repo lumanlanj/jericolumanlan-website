@@ -6,6 +6,13 @@ import Container from "@/components/Container";
 
 export const revalidate = 0;
 
+export const metadata = {
+  title: "Writing — Jerico Lumanlan",
+  description:
+    "Essays and notes on product management, AI, climate tech, and e-commerce by Jerico Lumanlan.",
+  alternates: { canonical: "/writing" },
+};
+
 export default async function WritingPage() {
   const [medium, substack] = await Promise.all([fetchMedium(), fetchSubstack()]);
   const items = mergeWriting(medium, substack);
