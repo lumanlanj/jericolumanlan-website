@@ -3,7 +3,7 @@ import {
   redis,
   KEYS,
   RECENT_MAX,
-  lastCompleteWeekDaysET,
+  lastNDaysET,
 } from "@/lib/analytics-redis";
 
 // First-party stats read endpoint, polled by the SiteBar menu-bar app.
@@ -34,9 +34,11 @@ export async function GET(req: NextRequest) {
     });
   }
 
-  // Unique visitors over the last complete Mon–Sun week = cardinality of the
-  // union of that week's seven per-day HLLs (PFCOUNT merges multiple keys).
-  const weekDays = lastCompleteWeekDaysET();
+  // Unique visitors over a rolling 7-day window ending today = cardinality of
+  // the union of those seven per-day HLLs (PFCOUNT merges multiple keys). Rolling
+  // (not "last complete week") so the number includes today and reflects current
+  // traffic — the past 48h shows up immediately.
+  const weekDays = lastNDaysET(7);
   const weekKeys = weekDays.map(KEYS.uniqueHLLDay);
 
   const [
@@ -58,11 +60,11 @@ export async function GET(req: NextRequest) {
     redis.pfcount(...(weekKeys as [string, ...string[]])),
     redis.lrange(KEYS.recent, 0, RECENT_MAX - 1),
     redis.hgetall<Record<string, string | number>>(KEYS.sources),
-    // Per-day uniques: one PFCOUNT per day key, in Mon→Sun order.
+    // Per-day uniques: one PFCOUNT per day key, oldest→today order.
     Promise.all(weekKeys.map((k) => redis!.pfcount(k))),
   ]);
 
-  // Zero-filled per-day unique visitors for the week (Mon→Sun).
+  // Zero-filled per-day unique visitors for the rolling window (oldest→today).
   const dailyUnique = weekDays.map((day, i) => ({
     day,
     count: dailyCounts[i] ?? 0,

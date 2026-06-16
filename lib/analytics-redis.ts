@@ -72,6 +72,28 @@ export function lastCompleteWeekDaysET(now: Date = new Date()): string[] {
   });
 }
 
+// The last `n` ET calendar dates (YYYY-MM-DD, oldest→newest) ending *today*
+// (inclusive) — a rolling window. n=7 → today plus the previous six days, so
+// "the past week" reflects current traffic instead of lagging behind a
+// completed Mon–Sun week. DST-safe via a noon-UTC anchor on the ET date.
+export function lastNDaysET(n: number, now: Date = new Date()): string[] {
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "America/New_York",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).formatToParts(now);
+  const get = (t: string) => parts.find((x) => x.type === t)!.value;
+  const y = +get("year"), m = +get("month"), d = +get("day");
+  // Noon-UTC anchor on today's ET date → whole-day arithmetic is DST-safe.
+  const anchor = new Date(Date.UTC(y, m - 1, d, 12));
+  return Array.from({ length: n }, (_, i) => {
+    const x = new Date(anchor);
+    x.setUTCDate(anchor.getUTCDate() - (n - 1 - i));
+    return x.toISOString().slice(0, 10);
+  });
+}
+
 // Normalize a client-supplied source label to a safe, bounded token before it
 // becomes a Redis hash field. Anything empty/garbage collapses to "direct".
 export const cleanSource = sanitizeSourceLabel;
