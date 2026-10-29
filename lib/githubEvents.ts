@@ -75,7 +75,7 @@ export async function fetchGitHubEvents(now: number = Date.now()): Promise<GhAct
       // GitHub rejects requests without a User-Agent; Accept pins the API version.
       headers: {
         Accept: "application/vnd.github+json",
-        "User-Agent": "jericolumanlan.com",
+        "User-Agent": "heyjerico.com",
       },
       next: { revalidate: CACHE_SECONDS },
     });

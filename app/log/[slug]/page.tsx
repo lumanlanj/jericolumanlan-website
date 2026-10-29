@@ -56,11 +56,11 @@ export default async function LogEntryPage({
     description: entry.excerpt,
     datePublished: entry.date,
     dateModified: entry.date,
-    url: `https://jericolumanlan.com/log/${slug}`,
+    url: `https://heyjerico.com/log/${slug}`,
     author: {
       "@type": "Person",
       name: "Jerico Lumanlan",
-      url: "https://jericolumanlan.com",
+      url: "https://heyjerico.com",
     },
     ...(entry.tags && entry.tags.length > 0 ? { keywords: entry.tags.join(", ") } : {}),
   };

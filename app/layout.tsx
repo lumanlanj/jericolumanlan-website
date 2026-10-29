@@ -21,15 +21,17 @@ const jetbrainsMono = JetBrains_Mono({
   display: "swap",
 });
 
-const TITLE = "Jerico Lumanlan — Product Manager";
+const TITLE =
+  "Jerico Lumanlan — Senior Product Manager | Climate Tech, E-commerce & AI";
 const DESCRIPTION =
-  "Jerico Lumanlan is a Product Manager building products across sustainability, ecommerce, and customer experience.";
-const SITE_URL = "https://jericolumanlan.com";
+  "Senior Product Manager at Xpansiv who turns customer insight into revenue across climate tech and e-commerce — and builds the AI agents he uses every day. Ex-Staples, Pitney Bowes. Boston.";
+const SITE_URL = "https://heyjerico.com";
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: TITLE,
   description: DESCRIPTION,
+  alternates: { canonical: "/" },
   openGraph: {
     type: "website",
     url: SITE_URL,
@@ -38,10 +40,10 @@ export const metadata: Metadata = {
     description: DESCRIPTION,
     images: [
       {
-        url: "/og.png",
-        width: 2400,
-        height: 1260,
-        alt: "Jerico Lumanlan — Product Manager",
+        url: "/og.jpg",
+        width: 1200,
+        height: 630,
+        alt: TITLE,
       },
     ],
   },
@@ -50,7 +52,7 @@ export const metadata: Metadata = {
     title: TITLE,
     description: DESCRIPTION,
     creator: "@jericolumanlan",
-    images: ["/og.png"],
+    images: ["/og.jpg"],
   },
 };
 
