@@ -7,7 +7,7 @@ import { isOptedOut } from "@/lib/track";
 // Microsoft Clarity via @microsoft/clarity. The project id is public (it ships
 // in the page source either way), so it's baked in as the default;
 // NEXT_PUBLIC_CLARITY_ID can override it without a code change.
-const DEFAULT_CLARITY_ID = "x4du7710pc";
+const DEFAULT_CLARITY_ID = "z5gls1j21x";
 
 export default function ClarityInit() {
   const id = process.env.NEXT_PUBLIC_CLARITY_ID ?? DEFAULT_CLARITY_ID;
