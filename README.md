@@ -1,10 +1,10 @@
-# jericolumanlan.com
+# heyjerico.com
 
 My personal site — a living portfolio of the things I build, plus notes and writing.
 Built and maintained as its own small product: live data, a 3D hero, and a
 mobile-first design system.
 
-**Live:** https://jericolumanlan.com
+**Live:** https://heyjerico.com
 
 ## What's here
 
