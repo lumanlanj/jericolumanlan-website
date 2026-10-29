@@ -333,7 +333,7 @@ figcaption.flag::before { content: ""; width: 4px; height: 4px; border-radius: 5
 }
 .work-cta:hover .cta-arrow { transform: translate(2px, -2px); }
 
-/* Tinker-in-public callout (closes The Lab). */
+/* Tinker-in-public callout (closes AI products). */
 .tinker {
   margin-top: 64px;
   display: grid; grid-template-columns: 1fr; gap: 22px;
@@ -454,45 +454,79 @@ figcaption.flag::before { content: ""; width: 4px; height: 4px; border-radius: 5
 }
 
 .hero-wrap { position: relative; z-index: 2; width: 100%; margin: 0 auto; max-width: 1180px; padding: 128px 24px 92px; }
-.hero-grid { display: grid; grid-template-columns: 1fr; align-items: start; }
+.hero-intro { max-width: 54ch; }
 
-/* Kicker — name (display) over role (mono). */
-.hero-kicker { margin: 0 0 26px; display: flex; flex-direction: column; gap: 9px; }
-.hero-name { font-size: 26px; font-weight: 600; letter-spacing: -0.02em; color: #fff; line-height: 1; }
-.hero-role { font-family: var(--font-mono); font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.2em; color: rgba(255,255,255,0.55); }
+/* Kicker — name only. */
+.hero-kicker { margin: 0 0 22px; display: flex; flex-direction: column; gap: 9px; }
+.hero-name { font-size: 15px; font-weight: 600; letter-spacing: -0.01em; color: rgba(255,255,255,0.72); line-height: 1; }
 
-/* Bio — three-paragraph identity write-up. */
-.hero-bio { margin: 0; display: flex; flex-direction: column; gap: 15px; max-width: 54ch; }
-.hero-bio p { margin: 0; font-size: 16px; line-height: 1.62; color: rgba(255,255,255,0.72); }
-.hero-bio b { color: #fff; font-weight: 600; }
-
-/* Spec list — Now / Previously / Based. */
-.hero-meta { margin: 30px 0 0; padding: 0; display: flex; flex-direction: column; max-width: 52ch; border: 0; }
-/* Swapped rows: the value (dd) is the prominent white element on the left; the
-   label (dt) is a small mono tag, right-aligned on the right. */
-.hm-cell { display: grid; grid-template-columns: 1fr auto; gap: 18px; padding: 13px 0; border-top: 1px solid rgba(255,255,255,0.12); align-items: baseline; }
-.hm-cell:first-child { border-top: 0; }
-.hm-cell dd { grid-column: 1; grid-row: 1; margin: 0; font-size: 14px; line-height: 1.45; color: #fff; }
-.hm-cell dt { grid-column: 2; grid-row: 1; text-align: right; font-family: var(--font-mono); font-size: 10px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.18em; color: rgba(255,255,255,0.42); margin: 0; }
-
-/* "Mono decode" reveal — the VALUES (dd) scramble through random chars then
-   resolve; in-flux chars tint blue. Values start hidden only when JS is active
-   and the list opts in (data-decode); no-JS visitors see them at full opacity.
-   Driven by RevealController. */
-.hm-cell dd .scram { color: var(--color-accent); }
-.js .hero-meta[data-decode] dd { opacity: 0; }
-.hero-meta.decoded dd { opacity: 1; }
-@media (prefers-reduced-motion: reduce) {
-  .js .hero-meta[data-decode] dd { opacity: 1; }
+/* Dual headline — exactly one <h1>; inactive variant is display:none. */
+.hero-headline { margin: 0; font-size: 28px; font-weight: 600; letter-spacing: -0.03em; line-height: 1.15; color: #fff; }
+.hero-headline-desktop { display: none; }
+.hero-headline-mobile { display: inline; }
+@media (min-width: 640px) {
+  .hero-headline { font-size: 40px; line-height: 1.1; max-width: 18ch; }
+  .hero-headline-desktop { display: inline; }
+  .hero-headline-mobile { display: none; }
+}
+@media (min-width: 900px) {
+  .hero-headline { font-size: 46px; }
 }
 
-/* Credibility panel — impact stats with count-up. */
-.hero-cred { border: 1px solid var(--color-border); background: rgba(10,9,18,0.46); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
-.cred-head { display: flex; align-items: center; gap: 13px; margin: 0; padding: 17px 24px; border-bottom: 1px solid var(--color-border); font-family: var(--font-mono); font-size: 10.5px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.16em; color: rgba(255,255,255,0.55); }
-.cred-head .rule { flex: 0 0 auto; width: 28px; height: 1px; background: var(--color-hair); }
-.cred-head .accent { color: #fff; }
-.cred-stat { display: grid; grid-template-columns: 128px 1fr; align-items: center; gap: 20px; padding: 20px 24px; border-top: 1px solid rgba(255,255,255,0.08); }
-.cred-stat:first-of-type { border-top: 0; }
+.hero-subline {
+  margin: 18px 0 0; font-size: 15px; line-height: 1.55; color: rgba(255,255,255,0.68); max-width: 48ch;
+}
+@media (min-width: 640px) {
+  .hero-subline { font-size: 16px; }
+}
+
+.hero-ctas {
+  margin-top: 28px; display: flex; flex-wrap: wrap; gap: 10px;
+}
+.hero-ctas .contact-btn {
+  background: #fff; color: #08080c; border-color: #fff;
+}
+.hero-ctas .contact-btn:hover {
+  background: transparent; color: #fff; border-color: rgba(255,255,255,0.55);
+}
+.hero-ctas .contact-btn.ghost {
+  background: transparent; color: #fff; border-color: rgba(255,255,255,0.35);
+}
+.hero-ctas .contact-btn.ghost:hover {
+  border-color: #fff;
+}
+
+/* Impact stats strip — directly under the hero. */
+.stats-strip {
+  border-top: 1px solid var(--color-border);
+  border-bottom: 1px solid var(--color-border);
+  background: rgba(10, 9, 18, 0.72);
+  padding: 28px 0;
+}
+.stats-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 28px 20px;
+}
+.stats-item { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.stats-item .cs-fig {
+  font-size: 26px; font-weight: 600; letter-spacing: -0.035em; color: var(--color-ink);
+  font-variant-numeric: tabular-nums; line-height: 1;
+}
+.stats-label {
+  font-family: var(--font-mono); font-size: 11px; line-height: 1.4;
+  text-transform: uppercase; letter-spacing: 0.06em; color: var(--color-ink);
+}
+.stats-context {
+  font-family: var(--font-mono); font-size: 10px; line-height: 1.45;
+  letter-spacing: 0.02em; color: var(--color-muted);
+}
+@media (min-width: 900px) {
+  .stats-grid { grid-template-columns: repeat(4, 1fr); gap: 24px; }
+  .stats-item .cs-fig { font-size: 30px; }
+}
+
+/* Legacy count-up figure token (still used in stats strip). */
 .cs-fig { font-size: 30px; font-weight: 600; letter-spacing: -0.035em; color: #fff; font-variant-numeric: tabular-nums; line-height: 1; }
 .cs-cap { font-family: var(--font-mono); font-size: 10px; line-height: 1.55; text-transform: uppercase; letter-spacing: 0.05em; color: rgba(255,255,255,0.56); }
 
@@ -503,30 +537,17 @@ figcaption.flag::before { content: ""; width: 4px; height: 4px; border-radius: 5
 .hero-scroll-cue:hover { color: rgba(255,255,255,0.9); }
 @keyframes hero-bob { 0%, 100% { transform: translate(-50%, 0); } 50% { transform: translate(-50%, 7px); } }
 
-/* Desktop: two-column split — panel top-aligns with the first bio line. */
 @media (min-width: 900px) {
   .hero-wrap { padding: 120px 40px 100px; }
-  .hero-grid { grid-template-columns: 1.05fr 0.95fr; column-gap: 72px; row-gap: 0; }
-  .hero-kicker { grid-column: 1; grid-row: 1; }
-  .hero-id { grid-column: 1; grid-row: 2; }
-  /* Right column: spec list (Now/Previously/Based) stacked above the impact box. */
-  .hero-aside { grid-column: 2; grid-row: 2; align-self: start; }
-  .hero-aside .hero-meta { margin-top: 0; }   /* top-align spec list with the first bio line */
-  .hero-aside .hero-cred { margin-top: 28px; } /* gap between spec list and impact box */
-  .hero-name { font-size: 30px; }
-  .hero-bio p { font-size: 17px; }
-  .cs-fig { font-size: 34px; }
 }
-@media (min-width: 1200px) { .hero-grid { column-gap: 96px; } }
 
-/* Stacked: bio first, panel last. Dim the orb, swap the scrim to a vertical wash. */
+/* Stacked: dim the orb, swap the scrim to a vertical wash. */
 @media (max-width: 899px) {
   .hero-scrim {
     background: linear-gradient(to bottom, rgba(5,4,9,0.8) 0%, rgba(5,4,9,0.58) 42%, rgba(5,4,9,0.8) 100%);
   }
   #orb { opacity: 0.36; }
   .hero-wrap { padding-top: 116px; }
-  .hero-cred { margin-top: 34px; }
 }
 
 /* ---------- Sections ---------- */
@@ -546,6 +567,26 @@ section.block { border-top: 1px solid var(--color-border); padding: 80px 0; scro
 .bio { max-width: 60ch; font-size: 17px; line-height: 1.7; color: var(--color-bio); display: flex; flex-direction: column; gap: 20px; }
 .bio p { margin: 0; }
 .bio .ink { color: var(--color-ink); }
+.previously {
+  margin: 28px 0 0; font-family: var(--font-mono); font-size: 12px;
+  letter-spacing: 0.04em; color: var(--color-muted);
+}
+.pm-lesson {
+  margin: 16px 0 0; max-width: 46ch; padding: 12px 14px;
+  border-left: 2px solid var(--color-hair);
+  font-size: 14px; line-height: 1.55; color: var(--color-bio);
+}
+.pm-lesson-label {
+  display: block; margin-bottom: 4px;
+  font-family: var(--font-mono); font-size: 10px; font-weight: 500;
+  text-transform: uppercase; letter-spacing: 0.14em; color: var(--color-muted);
+}
+.work-placeholder { display: flex; flex-direction: column; gap: 8px; pointer-events: none; }
+.work-placeholder .work-soon {
+  font-family: var(--font-mono); font-size: 11px; text-transform: uppercase;
+  letter-spacing: 0.14em; color: var(--color-muted);
+}
+.hash-alias { position: absolute; width: 0; height: 0; overflow: hidden; }
 
 /* ---------- Work / Lab list ---------- */
 .work-list > a, .work-list > div { display: block; padding: 44px 0; text-decoration: none; border-top: 1px solid var(--color-border); }

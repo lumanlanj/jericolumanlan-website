@@ -3,7 +3,9 @@ import { fetchSubstack } from "@/lib/substack";
 import { fetchGitHubEvents } from "@/lib/githubEvents";
 import { mergeWriting } from "@/lib/writing";
 import { buildTickerItems } from "@/lib/ticker";
+import { PREVIOUSLY } from "@/lib/previously";
 import Hero from "@/components/Hero";
+import StatsStrip from "@/components/StatsStrip";
 import ActivityTicker from "@/components/ActivityTicker";
 import CarlDemo from "@/components/CarlDemo";
 import MahtaDemo from "@/components/MahtaDemo";
@@ -16,14 +18,12 @@ export const metadata = {
   alternates: { canonical: "/" },
 };
 
-// Person entity for branded search — helps Google connect jericolumanlan.com to
-// the off-site profiles (sameAs) and build a knowledge entity for the name.
 const personJsonLd = {
   "@context": "https://schema.org",
   "@type": "Person",
   name: "Jerico Lumanlan",
-  url: "https://jericolumanlan.com",
-  jobTitle: "Product Manager",
+  url: "https://heyjerico.com",
+  jobTitle: "Senior Product Manager",
   worksFor: { "@type": "Organization", name: "Xpansiv" },
   address: {
     "@type": "PostalAddress",
@@ -38,6 +38,21 @@ const personJsonLd = {
     "https://github.com/lumanlanj",
   ],
 };
+
+const WORK_PLACEHOLDERS = [
+  {
+    title: "Xpansiv — LCFS compliance",
+    subtitle: "Clean-transportation compliance reporting",
+  },
+  {
+    title: "Staples — Experimentation",
+    subtitle: "E-commerce experimentation & journey redesign",
+  },
+  {
+    title: "Pitney Bowes — ML returns prediction",
+    subtitle: "Returns-prediction ML product",
+  },
+] as const;
 
 export default async function Home() {
   const [medium, substack, ghEvents] = await Promise.all([
@@ -58,8 +73,30 @@ export default async function Home() {
       />
       <ActivityTicker items={tickerItems} />
       <SectionIndex />
-      {/* HERO — identity + impact (merges About bio + Proof stats), anchored #about */}
       <Hero />
+      <StatsStrip />
+
+      {/* ABOUT */}
+      <section className="block" id="about">
+        <div className="container">
+          <p className="eyebrow reveal">
+            <span className="num">01</span>
+            <span className="rule" aria-hidden="true"></span>
+            <span>About</span>
+          </p>
+          <div className="bio reveal">
+            <p>
+              I&rsquo;m a product manager at Xpansiv, a climate-tech unicorn backed by Aramco, Bank of America, and Goldman Sachs, where I build compliance and clean-transportation products for low-carbon fuel markets. Before that, I led e-commerce experimentation at Staples that drove $5.8M+ in incremental revenue across a ~$1B digital business, and built an ML returns-prediction product at Pitney Bowes that lifted accuracy from 40% to 85% with retailers like Nordstrom and REI.
+            </p>
+            <p>
+              I started as a UX designer, so I lead with customer conversations and back decisions with data. I also build AI agents I rely on daily — an executive assistant and a product-analyst agent — which keeps my sense of what makes AI products useful (and trustworthy) sharp. Outside work, I run and lift.
+            </p>
+          </div>
+          <p className="previously reveal">
+            Previously: {PREVIOUSLY.join(" · ")}
+          </p>
+        </div>
+      </section>
 
       {/* WRITING */}
       <section className="block" id="writing">
@@ -85,11 +122,31 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* THE LAB */}
-      <section className="block" id="lab">
+      {/* WORK — placeholders until Answer Bank stories land */}
+      <section className="block" id="work">
         <div className="container">
-          <p className="eyebrow reveal"><span className="num">03</span><span className="rule" aria-hidden="true"></span><span>The Lab</span></p>
-          <p className="section-lede reveal">Agents and tools I build for myself and actually use day to day &mdash; where I keep my craft sharp and test what AI products should feel like.</p>
+          <p className="eyebrow reveal"><span className="num">03</span><span className="rule" aria-hidden="true"></span><span>Work</span></p>
+          <div className="work-list">
+            {WORK_PLACEHOLDERS.map((item) => (
+              // TODO(jerico): case study body from Answer Bank
+              <div key={item.title}>
+                <div className="work-item work-placeholder reveal">
+                  <h3 className="work-title">{item.title}</h3>
+                  <p className="work-desc">{item.subtitle}</p>
+                  <span className="work-soon">Case study coming soon</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* AI PRODUCTS (formerly Lab) — #lab alias kept for old links */}
+      <section className="block" id="ai-products" style={{ position: "relative" }}>
+        <span id="lab" className="hash-alias" aria-hidden="true" />
+        <div className="container">
+          <p className="eyebrow reveal"><span className="num">04</span><span className="rule" aria-hidden="true"></span><span>AI products I build</span></p>
+          <p className="section-lede reveal">Agents I build and use every day. Running my own products end to end — from problem to daily use — is how I test what AI products should feel like, and where they break.</p>
           <div className="work-list">
             <div>
               <div className="work-item work-item--featured">
@@ -104,6 +161,10 @@ export default async function Home() {
                     <li>Spins up throwaway mini-apps from a plain conversation</li>
                     <li>Production-grade for an agent: self-heals when it crashes and pings me on Telegram if anything&rsquo;s down</li>
                   </ul>
+                  <p className="pm-lesson">
+                    <span className="pm-lesson-label">PM lesson</span>
+                    Memory and reliability matter more than features — people trust an assistant that remembers their corrections and tells them when it&rsquo;s down.
+                  </p>
                 </div>
                 <CarlDemo />
               </div>
@@ -115,6 +176,10 @@ export default async function Home() {
                   <h3 className="work-title">Mahta</h3>
                   <p className="work-desc">An AI product analyst. Name a company and a flow — say, Amazon&rsquo;s Subscribe &amp; Save enrollment — and Mahta researches the program, drives a real browser through the experience step by step, and returns a two-layer report: a Market &amp; Strategy brief, then an annotated storyboard of the real journey with every point of friction, persuasion, and gating flagged on the exact screen where it happens. Hours of competitive teardown, in minutes.</p>
                   <a className="work-cta" href="https://mahta.space" target="_blank" rel="noopener">Visit Mahta <span className="cta-arrow" aria-hidden="true">↗</span></a>
+                  <p className="pm-lesson">
+                    <span className="pm-lesson-label">PM lesson</span>
+                    The value isn&rsquo;t the AI, it&rsquo;s the output format — a teardown only lands when every finding is pinned to the exact screen where it happens.
+                  </p>
                 </div>
                 <MahtaDemo />
               </div>
@@ -141,17 +206,17 @@ export default async function Home() {
       {/* CONTACT / FOOTER */}
       <footer className="site-footer" id="contact">
         <div className="container">
-          <p className="eyebrow reveal"><span className="num">04</span><span className="rule" aria-hidden="true"></span><span>Contact</span></p>
+          <p className="eyebrow reveal"><span className="num">05</span><span className="rule" aria-hidden="true"></span><span>Contact</span></p>
           <div className="contact-grid">
             <div className="contact-lead reveal">
               <p className="footer-cta">Let&rsquo;s build something that holds up.</p>
               <div className="contact-actions">
                 <a className="contact-btn" href="/Jerico-Lumanlan-Resume.pdf" download="Jerico Lumanlan Resume.pdf">Download résumé <span aria-hidden="true">↓</span></a>
-                <a className="contact-btn ghost" href="https://www.linkedin.com/in/jerico-lumanlan" target="_blank" rel="noopener">Connect on LinkedIn <span aria-hidden="true">↗</span></a>
+                <a className="contact-btn ghost" href="mailto:jericol.jobs@gmail.com">Email me</a>
               </div>
             </div>
             <div className="contact-note reveal">
-              <p>The résumé has the full history, and LinkedIn is the fastest way to reach me.</p>
+              <p>The résumé has the full history, and email is the fastest way to reach me.</p>
               <p className="contact-loc mono">Boston, Massachusetts</p>
             </div>
           </div>
