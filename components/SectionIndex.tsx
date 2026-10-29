@@ -3,15 +3,14 @@
 import { useEffect, useRef } from "react";
 
 /**
- * Fixed right-edge section index, shown ≥1320px. The active item tracks
+ * Fixed right-edge section index (01–04), shown ≥1320px. The active item tracks
  * the section centered in view via a shared IntersectionObserver.
  */
 const ITEMS = [
   { id: "about", label: "About", num: "01" },
   { id: "writing", label: "Writing", num: "02" },
-  { id: "work", label: "Work", num: "03" },
-  { id: "ai-products", label: "AI products", num: "04" },
-  { id: "contact", label: "Contact", num: "05" },
+  { id: "lab", label: "Lab", num: "03" },
+  { id: "contact", label: "Contact", num: "04" },
 ];
 
 export default function SectionIndex() {

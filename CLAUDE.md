@@ -1,4 +1,4 @@
-# heyjerico.com — working rules
+# jericolumanlan.com — working rules
 
 Personal site. **Next.js 16 · React 19 · Tailwind CSS v4** (CSS-first config in
 `app/globals.css`, not `tailwind.config`). Auto-deploys to production on every

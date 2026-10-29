@@ -4,7 +4,7 @@ import { redis, KEYS, RECENT_MAX } from "@/lib/analytics-redis";
 const RESUME_PATH = "/Jerico-Lumanlan-Resume.pdf";
 
 // Tracked resume share links: give a specific recipient a link like
-//   https://heyjerico.com/r/stripe-jane
+//   https://jericolumanlan.com/r/stripe-jane
 // A hit logs which slug was opened (so you know which link you sent was used),
 // counts it toward the resume-download total, then redirects to the PDF.
 // This is logged server-side (trusted) rather than via /api/track.

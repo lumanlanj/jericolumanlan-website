@@ -1,6 +1,6 @@
 import type { MetadataRoute } from "next";
 
-const SITE_URL = "https://heyjerico.com";
+const SITE_URL = "https://jericolumanlan.com";
 
 // Allow everything except utility routes: /optout (tracking opt-out UI) and /r/*
 // (the résumé-download redirect/tracker). Points crawlers at the sitemap.

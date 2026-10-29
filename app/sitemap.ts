@@ -3,8 +3,8 @@ import { readLogEntries } from "@/lib/log";
 
 // Generated at build time. Log posts are added via commit (which redeploys), so
 // a build-time sitemap stays current; it scales automatically as posts land in
-// content/log/. Submit https://heyjerico.com/sitemap.xml in Search Console.
-const SITE_URL = "https://heyjerico.com";
+// content/log/. Submit https://jericolumanlan.com/sitemap.xml in Search Console.
+const SITE_URL = "https://jericolumanlan.com";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const entries = await readLogEntries();

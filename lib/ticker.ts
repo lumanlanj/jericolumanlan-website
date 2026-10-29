@@ -54,14 +54,14 @@ export function buildTickerItems(
   const merged = [...gh, ...posts].sort((a, b) => b.ts - a.ts);
 
   // Nothing fresh this week → a single self-deprecating fallback that points to
-  // AI products, so the strip is never empty/awkward.
+  // The Lab, so the strip is never empty/awkward.
   if (merged.length === 0) {
     return [
       {
         icon: "spark",
         verb: "Quiet week —",
-        detail: "see the AI products I build",
-        url: "#ai-products",
+        detail: "see what I'm building in The Lab",
+        url: "#lab",
         time: "",
       },
     ];
