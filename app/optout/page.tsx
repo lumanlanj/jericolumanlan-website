@@ -25,7 +25,9 @@ export default function OptOut() {
         <p className="text-[15px] leading-relaxed text-(--color-bio)">
           Excludes <em>this browser</em> from all site analytics — first-party
           counts, Clarity, and Vercel. Set it once on every browser/device you
-          edit from; it persists until you clear site data.
+          edit from; it persists until you clear site data. Owner networks in{" "}
+          <code className="text-[13px]">OWNER_IPS</code> are also excluded
+          server-side (every device on those IPs, no toggle needed).
         </p>
 
         {out === null ? (

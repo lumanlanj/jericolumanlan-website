@@ -1,3 +1,4 @@
+import { OWNER_COOKIE } from "./owner-ip";
 import { sanitizeSourceLabel } from "./text";
 
 // First-party, anonymous client tracking. A random per-browser id (no identity)
@@ -7,6 +8,19 @@ import { sanitizeSourceLabel } from "./text";
 
 const VID_KEY = "sb_vid";
 const OPTOUT_KEY = "sb_optout";
+
+// True when middleware stamped sb_owner=1 for this request's IP (OWNER_IPS).
+// Complements the per-browser /optout flag below.
+export function isOwnerNetwork(): boolean {
+  if (typeof document === "undefined") return false;
+  try {
+    return document.cookie
+      .split(";")
+      .some((part) => part.trim() === `${OWNER_COOKIE}=1`);
+  } catch {
+    return false;
+  }
+}
 
 // Owner opt-out: when set, this browser is excluded from ALL analytics
 // (first-party events, Clarity, and Vercel). Toggle it on the /optout page.
