@@ -54,10 +54,10 @@ export const metadata: Metadata = {
   },
 };
 
-// Dark browser chrome to match the site; edge-to-edge so the safe-area insets
+// Sky-blue browser chrome to match the field; edge-to-edge so the safe-area insets
 // below can let the floating nav clear the notch / Dynamic Island.
 export const viewport: Viewport = {
-  themeColor: "#08080c",
+  themeColor: "#0593C6",
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",

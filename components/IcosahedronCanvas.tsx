@@ -329,8 +329,8 @@ export default function IcosahedronCanvas({
           float dd = length(uv);
           if (dd > 0.5) discard;
           float soft = smoothstep(0.5, 0.0, dd);
-          vec3 core = vec3(0.82, 0.18, 0.20);
-          vec3 rim  = vec3(1.0, 0.84, 0.80);
+          vec3 core = vec3(0.847, 0.224, 0.584); /* #D83995 */
+          vec3 rim  = vec3(0.70, 0.90, 0.98); /* white toward sky blue */
           float b = clamp(vBright, 0.0, 1.0);
           vec3 col = mix(core, rim, b * b);
           gl_FragColor = vec4(col, soft * (0.16 + 1.35 * vBright));
@@ -364,7 +364,7 @@ export default function IcosahedronCanvas({
           float d = length(vUv - 0.5) * 2.0;
           float a = pow(smoothstep(1.0, 0.0, d), 2.6);
           a *= 0.85 + 0.15 * sin(u_time * 0.5);
-          gl_FragColor = vec4(vec3(0.66, 0.15, 0.17), a * 0.35);
+          gl_FragColor = vec4(vec3(0.847, 0.224, 0.584), a * 0.35);
         }
       `,
     });
